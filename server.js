@@ -1,14 +1,19 @@
-var express = require('express');
+var express = require('express'),
+	channels = require('./routes/channels');
  
 var app = express();
- 
-app.get('/channel', function(req, res) {
-    res.send([{name:'wine1'}, {name:'wine2'}]);
+
+app.configure(function () {
+    app.use(express.logger('dev'));     /* 'default', 'short', 'tiny', 'dev' */
+    app.use(express.bodyParser());
 });
 
-app.get('/channel/:id', function(req, res) {
-    res.send({id:req.params.id, name: "The Name", description: "description"});
-});
- 
+app.get('/channels', channels.findAll);
+app.get('/channels/:id', channels.findById);
+app.post('/channels', channels.addChannel);
+app.put('/channels/:id', channels.updateChannel);
+app.delete('/channels/:id', channels.deleteChannel);
+
+
 app.listen(3000);
 console.log('Listening on port 3000...');
