@@ -1,0 +1,9 @@
+{
+    "name": "volkszaehler",
+    "description": "Volkszaehler.org data logger",
+    "version": "0.0.1",
+    "private": true,
+    "dependencies": {
+        "express": "3.x"
+    }
+}
