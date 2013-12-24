@@ -1,4 +1,4 @@
-Customer:
+Volkszaehler:
   server:
     Port: 3000
   db:

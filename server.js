@@ -1,7 +1,7 @@
 var express = require('express'),
     path = require('path'),
     http = require('http'),
-    CONFIG = require('config').Customer,
+    CONFIG = require('config').Volkszaehler,
 	channels = require('./routes/channels');
  
 var app = express();

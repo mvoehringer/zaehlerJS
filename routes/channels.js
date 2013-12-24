@@ -4,7 +4,7 @@ var mongo = require('mongodb');
 var Server = mongo.Server,
     Db = mongo.Db,
     BSON = mongo.BSONPure,
-    CONFIG = require('config').Customer;
+    CONFIG = require('config').Volkszaehler;
  
 var server = new Server(CONFIG.db.Host, CONFIG.db.Port, {auto_reconnect: true});
 db = new Db(CONFIG.db.Name, server);
