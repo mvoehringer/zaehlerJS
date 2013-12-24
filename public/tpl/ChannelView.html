@@ -10,10 +10,10 @@
                 <div class="col-md-8">
 
                     <div class="form-group">
-                        <label for="wineId" class="col-sm-2 control-label">Id:</label>
+                        <label for="channelId" class="col-sm-2 control-label">Id:</label>
 
                         <div class="col-sm-10">
-                            <input id="wineId" class="form-control" name="id" type="text" value="<%= _id === null ? '' : _id %>"
+                            <input id="channelId" class="form-control" name="id" type="text" value="<%= _id === null ? '' : _id %>"
                                    disabled/>
                         </div>
                     </div>
@@ -28,52 +28,13 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="grapes" class="col-sm-2 control-label">Grapes:</label>
+                        <label for="description" class="col-sm-2 control-label">Description:</label>
 
                         <div class="col-sm-10">
-                            <input type="text" class="form-control" id="grapes" name="grapes" value="<%= grapes %>"/>
+                            <input type="text" class="form-control" id="description" name="description" value="<%= description %>"/>
                             <span class="help-inline"></span>
                         </div>
                     </div>
-
-                    <div class="form-group">
-                        <label for="country" class="col-sm-2 control-label">Country:</label>
-
-                        <div class="col-sm-10">
-                            <input type="text" class="form-control"  id="country" name="country" value="<%= country %>"/>
-                            <span class="help-inline"></span>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="region" class="col-sm-2 control-label">Region:</label>
-
-                        <div class="col-sm-10">
-                            <input type="text" id="region" name="region" value="<%= region %>"/>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="year" class="col-sm-2 control-label">Year:</label>
-
-                        <div class="col-sm-10">
-                            <select class="input-small" id="year" name="year" value="<%= year %>">
-                                <option
-                                <%= year == 2012?'selected':'' %>>2012</option>
-                                <option
-                                <%= year == 2011?'selected':'' %>>2011</option>
-                                <option
-                                <%= year == 2010?'selected':'' %>>2010</option>
-                                <option
-                                <%= year == 2009?'selected':'' %>>2009</option>
-                                <option
-                                <%= year == 2008?'selected':'' %>>2008</option>
-                                <option
-                                <%= year == 2007?'selected':'' %>>2007</option>
-                            </select>
-                        </div>
-                    </div>
-
                 </div>
 
                 <div class="col-md-4">
@@ -86,7 +47,7 @@
         <div class="form-group ">
             <div class="col-sm-offset-2 col-sm-10">
                 <a href="#" class="btn btn-primary save">Save</a>
-                <a href="#" class="btn delete">Delete</a>
+                <a href="#" class="btn btn-danger delete"><span class="glyphicon glyphicon-trash"></span> Delete</a>
             </div>
         </div>
 

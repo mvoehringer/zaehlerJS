@@ -1,5 +1,6 @@
 
 var CONFIG = require('config').Volkszaehler;
+var BSON = require('mongodb').BSONPure;
 
 
 exports.findAll = function(req, res) {
@@ -38,8 +39,10 @@ exports.addChannel = function(req, res) {
 exports.updateChannel = function(req, res) {
     var id = req.params.id;
     var channel = req.body;
+    delete channel._id;
     console.log('Updating channel: ' + id);
     console.log(JSON.stringify(channel));
+
     db.collection('channels', function(err, collection) {
         collection.update({'_id':new BSON.ObjectID(id)}, channel, {safe:true}, function(err, result) {
             if (err) {

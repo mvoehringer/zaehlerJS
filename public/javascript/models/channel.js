@@ -11,12 +11,8 @@ window.Channel = Backbone.Model.extend({
             return value.length > 0 ? {isValid: true} : {isValid: false, message: "You must enter a name"};
         };
 
-        this.validators.grapes = function (value) {
-            return value.length > 0 ? {isValid: true} : {isValid: false, message: "You must enter a grape variety"};
-        };
-
-        this.validators.country = function (value) {
-            return value.length > 0 ? {isValid: true} : {isValid: false, message: "You must enter a country"};
+        this.validators.description = function (value) {
+            return value.length > 0 ? {isValid: true} : {isValid: false, message: "You must enter a description"};
         };
     },
 

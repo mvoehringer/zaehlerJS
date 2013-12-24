@@ -12,7 +12,7 @@ window.ChannelView = Backbone.View.extend({
     events: {
         "change"        : "change",
         "click .save"   : "beforeSave",
-        "click .delete" : "deleteWine",
+        "click .delete" : "deleteChannel",
         "drop #picture" : "dropHandler"
     },
 
@@ -38,52 +38,38 @@ window.ChannelView = Backbone.View.extend({
     beforeSave: function () {
         var self = this;
         var check = this.model.validateAll();
+        console.log("beforeSave");
         if (check.isValid === false) {
             utils.displayValidationErrors(check.messages);
             return false;
         }
-        this.saveWine();
+        this.saveChannel();
         return false;
     },
 
-    saveWine: function () {
+    saveChannel: function () {
         var self = this;
         console.log('before save');
         this.model.save(null, {
             success: function (model) {
                 self.render();
-                app.navigate('wines/' + model.id, false);
-                utils.showAlert('Success!', 'Wine saved successfully', 'alert-success');
+                app.navigate('channels/' + model.id, false);
+                utils.showAlert('Success!', 'Channel saved successfully', 'alert-success');
             },
             error: function () {
-                utils.showAlert('Error', 'An error occurred while trying to delete this item', 'alert-error');
+                utils.showAlert('Error', 'An error occurred while trying to save this item', 'alert-error');
             }
         });
     },
 
-    deleteWine: function () {
+    deleteChannel: function () {
         this.model.destroy({
             success: function () {
-                alert('Wine deleted successfully');
+                alert('Channel deleted successfully');
                 window.history.back();
             }
         });
         return false;
     },
-
-    dropHandler: function (event) {
-        event.stopPropagation();
-        event.preventDefault();
-        var e = event.originalEvent;
-        e.dataTransfer.dropEffect = 'copy';
-        this.pictureFile = e.dataTransfer.files[0];
-
-        // Read the image file from the local file system and display it in the img tag
-        var reader = new FileReader();
-        reader.onloadend = function () {
-            $('#picture').attr('src', reader.result);
-        };
-        reader.readAsDataURL(this.pictureFile);
-    }
 
 });
