@@ -1,25 +1,6 @@
 
-var mongo = require('mongodb');
- 
-var Server = mongo.Server,
-    Db = mongo.Db,
-    BSON = mongo.BSONPure,
-    CONFIG = require('config').Volkszaehler;
- 
-var server = new Server(CONFIG.db.Host, CONFIG.db.Port, {auto_reconnect: true});
-db = new Db(CONFIG.db.Name, server);
- 
-db.open(function(err, db) {
-    if(!err) {
-        console.log("Connected to '" + CONFIG.db.Name + "' database");
-        db.collection('channels', {strict:true}, function(err, collection) {
-            if (err) {
-                console.log("The 'channels' collection doesn't exist. Creating it with sample data...");
-                populateDB();
-            }
-        });
-    }
-});
+var CONFIG = require('config').Volkszaehler;
+
 
 exports.findAll = function(req, res) {
     db.collection('channels', function(err, collection) {

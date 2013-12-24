@@ -5,3 +5,4 @@ Volkszaehler:
     Host: localhost
     Port: 27017
     Name: voelkszaehler
+    DataCollectionPrefix: channel-data-
