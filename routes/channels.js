@@ -3,14 +3,15 @@ var mongo = require('mongodb');
  
 var Server = mongo.Server,
     Db = mongo.Db,
-    BSON = mongo.BSONPure;
+    BSON = mongo.BSONPure,
+    CONFIG = require('config').Customer;
  
-var server = new Server('localhost', 27017, {auto_reconnect: true});
-db = new Db('voelkszaehler', server);
+var server = new Server(CONFIG.db.Host, CONFIG.db.Port, {auto_reconnect: true});
+db = new Db(CONFIG.db.Name, server);
  
 db.open(function(err, db) {
     if(!err) {
-        console.log("Connected to 'voelkszaehler' database");
+        console.log("Connected to '" + CONFIG.db.Name + "' database");
         db.collection('channels', {strict:true}, function(err, collection) {
             if (err) {
                 console.log("The 'channels' collection doesn't exist. Creating it with sample data...");

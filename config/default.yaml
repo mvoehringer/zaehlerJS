@@ -1,0 +1,7 @@
+Customer:
+  server:
+    Port: 3000
+  db:
+    Host: localhost
+    Port: 27017
+    Name: voelkszaehler

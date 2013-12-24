@@ -1,15 +1,18 @@
 var express = require('express'),
     path = require('path'),
     http = require('http'),
+    CONFIG = require('config').Customer,
 	channels = require('./routes/channels');
  
 var app = express();
 
+
 app.configure(function () {
-	app.set('port', process.env.PORT || 3000);
+	app.set('port', CONFIG.server.Port);
     app.use(express.logger('dev'));     /* 'default', 'short', 'tiny', 'dev' */
     app.use(express.bodyParser());
-    app.use(express.static(path.join(__dirname, 'public')));
+    app.use(express.compress()); 		/* enable gzip compression */
+    app.use(express.static(path.join(__dirname, 'public'))); /* serve static files */
 });
 
 app.get('/channels', channels.findAll);
