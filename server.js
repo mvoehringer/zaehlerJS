@@ -45,7 +45,7 @@ app.put('/channels/:id', channels.updateChannel);
 app.delete('/channels/:id', channels.deleteChannel);
 
 app.post('/data/:id', data.addData);
-app.get('/data/:id', data.findAll);
+app.get('/data/:id', data.find);
 
 http.createServer(app).listen(app.get('port'), function () {
     console.log("Express server listening on port " + app.get('port'));
