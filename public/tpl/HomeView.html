@@ -32,10 +32,16 @@ $(document).ready(function() {
                 }
             }
 		},
-        series: [{}]
+        series: [{
+            marker : { 
+                enabled : false
+            }
+        }]
     };
 
+
     $.getJSON('data/52b8caa4eb30c37c2e9800c6/?start=2013-12-01&end=2013-12-30', function(data) {
+            
             var dataArray  = [];
             options.series[0].data = [];
             options.series[0].name = "52b8caa4eb30c37c2e9800c6";
