@@ -11,39 +11,62 @@ exports.find = function(req, res) {
     var end = req.query.end ? new Date(req.query.end) : null;
     var filter = {};
     var aggregationFields = {'_id': false};
-
+    
+    
     if (start && end) {
         filter = { $and: [{ "date": { $gte: start} }, { "date": { $lt: end}}] };
     }
 
     db.collection( CONFIG.db.DataCollectionPrefix + channelId, function(err, collection) {
-        collection.find(filter, aggregationFields).toArray(function(err, items) {
-            res.send(items);
+        var itemsArray = [];
+        var cursor = collection.find(filter, aggregationFields);
+        cursor.each(function(err, item) {
+            // If the item is null then the cursor is exhausted/empty and closed
+            if(item == null) {
+               res.send(itemsArray);
+            }else{
+                itemsArray.push( [item['date'].toJSON(), item['value']]);
+            }
         });
     });
 };
 
-exports.addData = function(req, res) {
+addData = function(channel, value, date){
     var data =  new Object();
-    var channelId = req.params.id;
-
-    data["date"] = new Date();
-    data["value"] = req.body["value"];
+    data["date"] = date;
+    data["value"] = value;
 
     console.log('Adding data ' + JSON.stringify(data));
 
-    // TODO: check if channel exists
-    db.collection( CONFIG.db.DataCollectionPrefix + channelId, function(err, collection) {
+    db.collection( CONFIG.db.DataCollectionPrefix + channel, function(err, collection) {
         collection.insert(data, {safe:true}, function(err, result) {
             if (err) {
                 res.send({'error':'An error has occurred'});
             } else {
                 console.log('Success: ' + JSON.stringify(result[0]));
-                res.send(result[0]);
+                return result[0];
             }
         });
     });
 }
 
+exports.addData = function(req, res) {
+    res.send(addData(req.params.id, req.body["value"], new Date()));
+}
+
+exports.addDemoData = function(req, res) {
+    var endDate = new Date(); // NOW
+    var actualDate = new Date();        // Now - 1year
+    actualDate.setYear(endDate.getFullYear() - 1 );
+
+    console.log("end Date: " + endDate);
+
+    while (actualDate <= endDate){
+        console.log("actualDate Date: " + actualDate);
+        addData(req.params.id, 1.1 , actualDate);
+        actualDate.setUTCHours(actualDate.getUTCHours() + 1); // + 1 hour
+    }
+    res.send(true);
+}
 
 
