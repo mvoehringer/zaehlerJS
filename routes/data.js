@@ -18,6 +18,7 @@ exports.find = function(req, res) {
 
     db.collection( CONFIG.db.DataCollectionPrefix + channelId, function(err, collection) {
         collection.find(filter, aggregationFields).toArray(function(err, items) {
+            console.log(items);
             res.send(items);
         });
     });
