@@ -11,15 +11,22 @@ exports.find = function(req, res) {
     var end = req.query.end ? new Date(req.query.end) : null;
     var filter = {};
     var aggregationFields = {'_id': false};
-
+    
+    
     if (start && end) {
         filter = { $and: [{ "date": { $gte: start} }, { "date": { $lt: end}}] };
     }
 
     db.collection( CONFIG.db.DataCollectionPrefix + channelId, function(err, collection) {
-        collection.find(filter, aggregationFields).toArray(function(err, items) {
-            console.log(items);
-            res.send(items);
+        var itemsArray = [];
+        var cursor = collection.find(filter, aggregationFields);
+        cursor.each(function(err, item) {
+            // If the item is null then the cursor is exhausted/empty and closed
+            if(item == null) {
+               res.send(itemsArray);
+            }else{
+                itemsArray.push( [item['date'].toJSON(), item['value']]);
+            }
         });
     });
 };

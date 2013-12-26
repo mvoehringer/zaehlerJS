@@ -17,13 +17,8 @@ $(document).ready(function() {
         series: [{}]
     };
 
-    $.getJSON('data/52b8caa4eb30c37c2e9800c6/?start=2013-12-01&end=2013-12-25', function(data) {
-        var dataArray = [];
-        data.forEach(function(data){
-        	dataArray.push([ new Date(data.date), data.value])
-        });
-        console.log(dataArray);
-        options.series[0].data = dataArray;
+    $.getJSON('data/52b8caa4eb30c37c2e9800c6/?start=2013-12-01&end=2013-12-30', function(data) {
+        options.series[0].data = data;
         var chart = new Highcharts.Chart(options);
     });
 
