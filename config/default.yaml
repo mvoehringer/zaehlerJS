@@ -1,4 +1,4 @@
-Volkszaehler:
+ZaehlerJS:
   server:
     Port: 3000
   db:

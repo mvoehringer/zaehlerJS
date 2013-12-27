@@ -1,5 +1,5 @@
 
-var CONFIG = require('config').Volkszaehler;
+var CONFIG = require('config').ZaehlerJS;
 
 /*
 @param start startdate for filter
@@ -11,7 +11,6 @@ exports.find = function(req, res) {
     var end = req.query.end ? new Date(req.query.end) : null;
     var filter = {};
     var aggregationFields = {'_id': false};
-    
     
     if (start && end) {
         filter = { $and: [{ "date": { $gte: start} }, { "date": { $lt: end}}] };

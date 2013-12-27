@@ -1,5 +1,5 @@
 
-var CONFIG = require('config').Volkszaehler;
+var CONFIG = require('config').ZaehlerJS;
 var BSON = require('mongodb').BSONPure;
 
 

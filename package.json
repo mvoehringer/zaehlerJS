@@ -1,11 +1,11 @@
 {
-    "name": "volkszaehler",
-    "description": "Volkszaehler.org data logger",
+    "name": "zaehlerJs",
+    "description": "ZählerJS is a data logger based on the idea of volkszaehler.org",
     "version": "0.0.1",
     "private": true,
     "dependencies": {
         "express": "3.x",
-        "mongodb": "1.3.x",
+        "mongodb": "1.4.x",
         "config": "",
         "yaml": ""
     },
