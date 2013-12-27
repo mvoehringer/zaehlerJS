@@ -18,7 +18,7 @@ exports.find = function(req, res) {
 
     db.collection( CONFIG.db.DataCollectionPrefix + channelId, function(err, collection) {
         var itemsArray = [];
-        var cursor = collection.find(filter, aggregationFields);
+        var cursor = collection.find(filter, aggregationFields).sort( { date: 1 } ).limit(500);
         cursor.each(function(err, item) {
             // If the item is null then the cursor is exhausted/empty and closed
             if(item == null) {

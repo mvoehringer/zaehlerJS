@@ -10,12 +10,12 @@ window.Data = Backbone.Model.extend({
 
     defaults: {
         _id: null,
-        name: "",
-        description: ""
+        date: "",
+        value: ""
     }
 });
 
 window.DataCollection = Backbone.Collection.extend({
     model: Data,
-    url: "/data"
+    url: "/data/52b8caa4eb30c37c2e9800c6"
 });

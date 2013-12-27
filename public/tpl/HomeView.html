@@ -1,57 +1,6 @@
-<div id="chart"></div>
 
-<script>
-$(document).ready(function() {
-
-    var options = {
-        chart: {
-            renderTo: 'chart',
-            type: 'line',
-            animation: false,
-            zoomType: 'x'
-        },
-        credits:{
-            enabled: false
-        },
-        title: {
-            text: 'Aktueller Zähler'
-        },
-        xAxis: {        
-			type: 'datetime',
-            labels: {
-                formatter: function () {
-                    return Highcharts.dateFormat('%a %d %b %H:%M', this.value);
-                },
-                dateTimeLabelFormats: {
-                    minute: '%H:%M',
-                    hour: '%H:%M',
-                    day: '%e. %b',
-                    week: '%e. %b',
-                    month: '%b \'%y',
-                    year: '%Y'
-                }
-            }
-		},
-        series: [{
-            marker : { 
-                enabled : false
-            }
-        }]
-    };
-
-
-    $.getJSON('data/52b8caa4eb30c37c2e9800c6/?start=2013-12-01&end=2013-12-30', function(data) {
-            
-            var dataArray  = [];
-            options.series[0].data = [];
-            options.series[0].name = "52b8caa4eb30c37c2e9800c6";
-
-            data.forEach(function(date){
-                options.series[0].data.push([ Date.parse(date[0]), date[1]]);
-            })
-
-        var chart = new Highcharts.Chart(options);
-    });
-
-});
-</script>
+<div class="row">
+    <div class="col-md-12">
+        <div id="chart" ></div>    
+    </div>
+</div>

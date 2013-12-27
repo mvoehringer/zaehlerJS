@@ -5,7 +5,7 @@ var BSON = require('mongodb').BSONPure;
 
 exports.findAll = function(req, res) {
     db.collection('channels', function(err, collection) {
-        collection.find().toArray(function(err, items) {
+        collection.find().sort({ name: 1 }).toArray(function(err, items) {
             res.send(items);
         });
     });
