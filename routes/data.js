@@ -18,7 +18,7 @@ exports.find = function(req, res) {
 
     db.collection( CONFIG.db.DataCollectionPrefix + channelId, function(err, collection) {
         var itemsArray = [];
-        var cursor = collection.find(filter, aggregationFields).sort( { date: 1 } ).limit(500);
+        var cursor = collection.find(filter, aggregationFields).sort( { date: 1 } ).limit(300);
         cursor.each(function(err, item) {
             // If the item is null then the cursor is exhausted/empty and closed
             if(item == null) {
@@ -62,7 +62,7 @@ exports.addDemoData = function(req, res) {
 
     while (actualDate <= endDate){
         console.log("actualDate Date: " + actualDate);
-        addData(req.params.id, 1.1 , actualDate);
+        addData(req.params.id, Math.floor(Math.random() * 16) + 1  , actualDate);
         actualDate.setUTCHours(actualDate.getUTCHours() + 1); // + 1 hour
     }
     res.send(true);
