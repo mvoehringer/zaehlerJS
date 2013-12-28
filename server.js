@@ -1,63 +1,91 @@
-var express = require('express'),
-    path = require('path'),
-    http = require('http'),
-    CONFIG = require('config').ZaehlerJS,
-	channels = require('./routes/channels'),
-	data = require('./routes/data');
- 
-/*
-Connect to MongoDB
-*/
-var mongo = require('mongodb');
-var Server = mongo.Server,
-    Db = mongo.Db;
- 
-var server = new Server(CONFIG.db.Host, CONFIG.db.Port, {auto_reconnect: true});
-db = new Db(CONFIG.db.Name, server, {safe:false});
- 
-db.open(function(err, db) {
-    if(!err) {
-        console.log("Connected to '" + CONFIG.db.Name + "' database");
-        db.collection('channels', {strict:true}, function(err, collection) {
-            if (err) {
-                console.log("The 'channels' collection doesn't exist. Creating it with sample data...");
-                populateDB();
-            }
-        });
+/**
+ * ZählerJS (https://github.com/mvoehringer/zaehlerjs)
+ *
+ * @file server.js
+ * @author Michel Vöhringer
+ */
+
+/**
+ * RequireJS
+ * @see http://requirejs.org/docs/node.html
+ */
+var requirejs = require('requirejs');
+requirejs.config({
+  nodeRequire: require
+});
+
+/**
+ * Express
+ * @see http://expressjs.com/guide.html
+ */
+requirejs([ 'http', 
+            'mongodb', 
+            'path', 
+            'express', 
+            'config', 
+            'socket.io', 
+            './routes/channels',
+            './routes/data' 
+            ], 
+
+            function(Http,
+                    Mongo, 
+                    Path, 
+                    Express, 
+                    Config, 
+                    Socketio, 
+                    Channels,
+                    Data){
+
+  // Initiate express
+  var app = Express();
+
+
+  // Load MongoDB
+  var db = new Mongo.Db(Config.ZaehlerJS.db.Name, 
+                        new Mongo.Server(Config.ZaehlerJS.db.Host, 
+                                         Config.ZaehlerJS.db.Port, {
+                                            native_parser: false,
+                                            auto_reconnect: true
+                                          }),{
+                            safe:false    
+                        });
+
+  db.open(function(err, db) {
+    if (err) {
+      return console.log('\u001b[31mFailed to connect to MongoDB: ' + err + '\033[0m');
+    } else {
+      console.log('\u001b[32mConnect to MongoDB\033[0m');
+      
+      // Start http server
+      var server = Http.createServer(app).listen(Config.ZaehlerJS.server.Port, function() {
+        console.log('\u001b[32mZählerJS listening on port \u001b[33m%d\033[0m', Config.ZaehlerJS.server.Port);
+      });
+
+      // configure express server
+      app.configure(function () {
+        app.set('config', Config.ZaehlerJS);
+        app.set('db', db);
+        app.use(Express.logger('dev'));                         /* 'default', 'short', 'tiny', 'dev' */
+        app.use(Express.urlencoded());
+        app.use(Express.json());
+        app.use(Express.compress());                            /* enable gzip compression */
+        app.use(Express.static(Path.join(__dirname, 'public'))); /* serve static files */
+        app.use(Express.favicon(__dirname + '/public/icon/favicon.ico')); /* add favicon */
+      });
+      
+      //  Configure routes
+      app.get('/channels', Channels.findAll);
+      app.get('/channels/:id', Channels.findById);
+      app.post('/channels', Channels.addChannel);
+      app.put('/channels/:id', Channels.updateChannel);
+      app.delete('/channels/:id', Channels.deleteChannel);
+
+      app.post('/data/:id', Data.addData);
+      app.post('/data/demo/:id', Data.addDemoData);
+      app.get('/data/:id', Data.find);
+
     }
+  });
 });
 
-/* 
- * Setup server
-*/
-var app = express();
-
-app.configure(function () {
-	app.set('port', CONFIG.server.Port);
-    app.use(express.logger('dev'));     /* 'default', 'short', 'tiny', 'dev' */
-    app.use(express.urlencoded());
-    app.use(express.json());
-    app.use(express.compress()); 		/* enable gzip compression */
-    app.use(express.static(path.join(__dirname, 'public'))); /* serve static files */
-});
-
-
-/*
- * Configure routes
-*/
-app.get('/channels', channels.findAll);
-app.get('/channels/:id', channels.findById);
-app.post('/channels', channels.addChannel);
-app.put('/channels/:id', channels.updateChannel);
-app.delete('/channels/:id', channels.deleteChannel);
-
-app.post('/data/:id', data.addData);
-app.post('/data/demo/:id', data.addDemoData);
-app.get('/data/:id', data.find);
-
-/*
-* Start server
-*/
-http.createServer(app).listen(app.get('port'), function () {
-    console.log("Express server listening on port " + app.get('port'));
-});
