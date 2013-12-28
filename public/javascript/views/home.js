@@ -36,7 +36,8 @@ window.HomeView = Backbone.View.extend({
 								name: model.get('name'),
 								data: dataArray,
 								marker : { 
-									enabled : false
+									enabled : false,
+									radius: '2px'
 								}
 							});
 
@@ -66,8 +67,20 @@ window.HomeView = Backbone.View.extend({
 			credits:{
 				enabled: false
 			},
+			plotOptions: {
+				line: {
+					lineWidth: '1px',
+					animation: false,
+					marker: {
+						enabled: false
+					}
+				}
+			},
 			title: {
 				text: 'Aktueller Zähler'
+			},
+			tooltip:{
+				enabled: false
 			},
 			xAxis: {        
 				type: 'datetime',

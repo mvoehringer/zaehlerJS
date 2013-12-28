@@ -4,11 +4,12 @@ define(function(require, exports, module) {
   @param end enddate for filter
   */
   exports.find = function(req, res) {
-      var channelId = req.params.id;
-      var start = req.query.start ? new Date(req.query.start) : null;
-      var end = req.query.end ? new Date(req.query.end) : null;
-      var filter = {};
-      var aggregationFields = {'_id': false};
+      var channelId = req.params.id,
+          start     = req.query.start ? new Date(req.query.start) : null,
+          end       = req.query.end ? new Date(req.query.end) : null,
+          limit     = req.query.limit ? parseInt(req.query.limit) : 500,
+          filter    = {},
+          aggregationFields = {'_id': false};
       
       if (start && end) {
           filter = { $and: [{ "date": { $gte: start} }, { "date": { $lt: end}}] };
@@ -18,7 +19,7 @@ define(function(require, exports, module) {
 
       req.app.get('db').collection( req.app.get('config').db.DataCollectionPrefix + channelId, function(err, collection) {
           var itemsArray = [];
-          var cursor = collection.find(filter, aggregationFields).sort( { date: 1 } ).limit(600);
+          var cursor = collection.find(filter, aggregationFields).sort( { date: 1 } ).limit(limit);
           cursor.each(function(err, item) {
               // If the item is null then the cursor is exhausted/empty and closed
               if(item == null) {
