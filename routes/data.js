@@ -18,7 +18,7 @@ define(function(require, exports, module) {
 
       req.app.get('db').collection( req.app.get('config').db.DataCollectionPrefix + channelId, function(err, collection) {
           var itemsArray = [];
-          var cursor = collection.find(filter, aggregationFields).sort( { date: 1 } ).limit(300);
+          var cursor = collection.find(filter, aggregationFields).sort( { date: 1 } ).limit(600);
           cursor.each(function(err, item) {
               // If the item is null then the cursor is exhausted/empty and closed
               if(item == null) {
@@ -29,21 +29,21 @@ define(function(require, exports, module) {
           });
       });
   };
-  
 
-  addData = function(db, channel, value, date){
+
+  addData = function(db, channelCollection, value, date){
       var data =  new Object();
       data["date"] = date;
       data["value"] = value;
 
-      console.log('Adding data ' + JSON.stringify(data));
+      // console.log('Adding data ' + JSON.stringify(data));
 
-      db.collection(req.app.get('config').db.DataCollectionPrefix + channel, function(err, collection) {
+      db.collection(channelCollection, function(err, collection) {
           collection.insert(data, {safe:true}, function(err, result) {
               if (err) {
                   res.send({'error':'An error has occurred'});
               } else {
-                  console.log('Success: ' + JSON.stringify(result[0]));
+                  // console.log('Success: ' + JSON.stringify(result[0]));
                   return result[0];
               }
           });
@@ -51,7 +51,10 @@ define(function(require, exports, module) {
   }
 
   exports.addData = function(req, res) {
-      res.send(addData(req.app.get('db'), req.params.id, req.body["value"], new Date()));
+      res.send(addData(req.app.get('db'), 
+                        req.app.get('config').db.DataCollectionPrefix + req.params.id, 
+                        req.body["value"], 
+                        new Date()));
   }
 
   exports.addDemoData = function(req, res) {
@@ -59,11 +62,14 @@ define(function(require, exports, module) {
       var actualDate = new Date();        // Now - 1year
       actualDate.setYear(endDate.getFullYear() - 1 );
 
-      console.log("end Date: " + endDate);
+      // console.log("end Date: " + endDate);
 
       while (actualDate <= endDate){
-          console.log("actualDate Date: " + actualDate);
-          addData(req.app.get('db'), req.params.id, Math.floor(Math.random() * 16) + 1  , actualDate);
+          // console.log("actualDate Date: " + actualDate);
+          addData(req.app.get('db'), 
+                req.app.get('config').db.DataCollectionPrefix + req.params.id, 
+                Math.floor(Math.random() * 16) + 1  , 
+                actualDate);
           actualDate.setUTCHours(actualDate.getUTCHours() + 1); // + 1 hour
       }
       res.send(true);

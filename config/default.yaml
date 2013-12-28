@@ -5,4 +5,4 @@ ZaehlerJS:
     Host: localhost
     Port: 27017
     Name: zaehlerjs
-    DataCollectionPrefix: cchannel_data_
+    DataCollectionPrefix: channel_data_

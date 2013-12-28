@@ -22,7 +22,7 @@ requirejs([ 'http',
             'mongodb', 
             'path', 
             'express', 
-            'config', 
+            'config',
             'socket.io', 
             './routes/channels',
             './routes/data' 
@@ -32,7 +32,7 @@ requirejs([ 'http',
                     Mongo, 
                     Path, 
                     Express, 
-                    Config, 
+                    Config,
                     Socketio, 
                     Channels,
                     Data){
@@ -56,6 +56,25 @@ requirejs([ 'http',
       return console.log('\u001b[31mFailed to connect to MongoDB: ' + err + '\033[0m');
     } else {
       console.log('\u001b[32mConnect to MongoDB\033[0m');
+
+      // Add indices to collections
+      db.collectionNames(function (err, list) {      
+
+        var dbname           = Config.ZaehlerJS.db.Name;
+        var collectoinPrefix = dbname + "." + Config.ZaehlerJS.db.DataCollectionPrefix;
+
+        list.forEach(function(item){
+            if (item.name.substring(0, collectoinPrefix.length) == collectoinPrefix) {
+                var collectionName = item.name.substring(dbname.length + 1);
+                db.collection(collectionName, function(err, collection) {
+                    collection.ensureIndex("date",function(data){
+                        console.log('\u001b[32mindex checked\033[0m');
+                    });
+                });
+            }
+        })
+      });
+
       
       // Start http server
       var server = Http.createServer(app).listen(Config.ZaehlerJS.server.Port, function() {
