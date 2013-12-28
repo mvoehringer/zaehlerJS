@@ -36,8 +36,28 @@ see http://c-mobberley.com/wordpress/index.php/2013/10/14/raspberry-pi-mongodb-i
  * sudo ln -s /opt/mongo/bin/mongod /usr/bin/mongod
  * sudo chmod u+x /etc/init.d/mongod
  * sudo update-rc.d mongod defaults
-
  * sudo /etc/init.d/mongod start
+
+#### OR ####
+see https://github.com/RickP/mongopi and http://ni-c.github.io/heimcontrol.js/get-started.html
+ * sudo apt-get install git-core build-essential scons libpcre++-dev xulrunner-dev libboost-dev libboost-program-options-dev libboost-thread-dev libboost-filesystem-dev
+ * git clone git://github.com/RickP/mongopi.git
+
+ {{{
+ sudo useradd mongodb
+
+sudo mkdir /var/lib/mongodb
+sudo chown mongodb:mongodb /var/lib/mongodb
+   
+sudo mkdir /etc/mongodb/
+sudo sh -c 'echo "dbpath=/var/lib/mongodb" > /etc/mongodb/mongodb.conf'
+
+cd /etc/init.d
+sudo wget -O mongodb https://gist.github.com/ni-c/fd4df404bda6e87fb718/raw/36d45897cd943fbd6d071c096eb4b71b37d0fcbb/mongodb.sh
+sudo chmod +x mongodb
+sudo update-rc.d mongodb defaults
+sudo service mongodb start
+ }}}
 
 
  ### Install ZählerJS
@@ -61,3 +81,12 @@ or
 {{{
   mocha
 }}}
+
+
+
+## TODOs
+ * GIPO Ports direkt auslesen
+ * Websockets zum Realtime anzeigen 
+ * Tests für alles
+ * Data Results beschränken und aggregieren
+ * Grafen mit Zomm-In/Zoom-Out 
