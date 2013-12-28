@@ -29,6 +29,7 @@ define(function(require, exports, module) {
           });
       });
   };
+  
 
   addData = function(db, channel, value, date){
       var data =  new Object();

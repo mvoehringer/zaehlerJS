@@ -17,7 +17,7 @@ define(function(require, exports, module) {
           });
       });
   };
-   
+     
   exports.findById = function(req, res) {
       var id = req.params.id;
       console.log('Retrieving channels: ' + id);
