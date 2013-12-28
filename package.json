@@ -10,8 +10,13 @@
         "config": "",
         "yaml": ""
     },
+    "devDependencies": {
+        "grunt": "~0.4.1",
+        "pow-mongodb-fixtures": "",
+        "supertest": ""
+    },
     "scripts": {
-        "test": "mocha"
+        "test": "NODE_ENV=test mocha"
     },
     "engines": {
         "node": "0.8.4",
