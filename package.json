@@ -9,6 +9,9 @@
         "config": "",
         "yaml": ""
     },
+    "scripts": {
+        "test": "mocha"
+    },
     "engines": {
         "node": "0.8.4",
         "npm": "1.1.49"

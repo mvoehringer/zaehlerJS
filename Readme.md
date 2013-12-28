@@ -50,3 +50,14 @@ see http://c-mobberley.com/wordpress/index.php/2013/10/14/raspberry-pi-mongodb-i
   * sudo iptables -A PREROUTING -t nat -i eth0 -p tcp --dport 80 -j REDIRECT --to-port 3000 
     OR 
     authbind node myscript (see http://www.debian-administration.org/articles/386)
+
+
+## Running unit test
+http://www.heise.de/developer/artikel/Unit-Tests-mit-Node-js-1823265.html
+{{{
+npm test
+}}}
+or 
+{{{
+  mocha
+}}}
