@@ -40,7 +40,6 @@ requirejs([ 'http',
   // Initiate express
   var app = Express();
 
-
   // Load MongoDB
   var db = new Mongo.Db(Config.ZaehlerJS.db.Name, 
                         new Mongo.Server(Config.ZaehlerJS.db.Host, 
@@ -57,34 +56,29 @@ requirejs([ 'http',
     } else {
       console.log('\u001b[32mConnect to MongoDB\033[0m');
 
-      // Add indices to collections
-      db.collectionNames(function (err, list) {      
+      // Create index
+      db.collection('data', function(err, collection) {
+          collection.ensureIndex("medadata.date",function(data){
+              console.log('\u001b[32mindex checked\033[0m');
+          });
+          collection.ensureIndex("medadata.channel",function(data){
 
-        var dbname           = Config.ZaehlerJS.db.Name;
-        var collectoinPrefix = dbname + "." + Config.ZaehlerJS.db.DataCollectionPrefix;
-
-        list.forEach(function(item){
-            if (item.name.substring(0, collectoinPrefix.length) == collectoinPrefix) {
-                var collectionName = item.name.substring(dbname.length + 1);
-                db.collection(collectionName, function(err, collection) {
-                    collection.ensureIndex("date",function(data){
-                        console.log('\u001b[32mindex checked\033[0m');
-                    });
-                });
-            }
-        })
+          });
       });
 
       /*
         Pre create document 
       */
       // Create Documents for today
-      Data.preAllocateDataDocumentForDay(db, new Date());
+      // Data.preAllocateDataDocumentForDay(db, new Date());
+      
       // Document for tomorrow
-      Data.preAllocateDataDocumentForDay(db, new Date(new Date().getTime() + 24 * 60 * 60 * 1000));
+      Data.preAllocateDataDocumentForDay(db, new Date(new Date().getTime() + 24*60*60*1000));
+
+      // Create evey 24 hours documents for the next day
       setInterval(function(){
         console.log("create new Documents for next day");
-        Data.preAllocateDataDocumentForDay(db, new Date());
+        Data.preAllocateDataDocumentForDay(db, new Date(new Date().getTime() + 24*60*60*1000));
       }, 24*60*60*1000);
       
 
