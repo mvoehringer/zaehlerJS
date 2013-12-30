@@ -9,15 +9,14 @@ define(function(require, exports, module) {
           end       = req.query.end ? new Date(req.query.end) : null,
           limit     = req.query.limit ? parseInt(req.query.limit) : 500,
           filter    = {},
-          aggregationFields = {'_id': false};
+          aggregationFields = {'_id': false},
+          config = req.app.get('config');
       
       if (start && end) {
           filter = { $and: [{ "date": { $gte: start} }, { "date": { $lt: end}}] };
       }
 
-      var config = req.app.get('config'); 
-
-      req.app.get('db').collection( req.app.get('config').db.DataCollectionPrefix + channelId, function(err, collection) {
+      req.app.get('db').collection( config.db.DataCollectionPrefix + channelId, function(err, collection) {
           var itemsArray = [];
           var cursor = collection.find(filter, aggregationFields).sort( { date: 1 } ).limit(limit);
           cursor.each(function(err, item) {
@@ -32,7 +31,7 @@ define(function(require, exports, module) {
   };
 
 
-  addData = function(db, channelCollection, value, date){
+  _addData = function(db, channelCollection, value, date){
       var data =  new Object();
       data["date"] = date;
       data["value"] = value;
@@ -52,7 +51,7 @@ define(function(require, exports, module) {
   }
 
   exports.addData = function(req, res) {
-      res.send(addData(req.app.get('db'), 
+      res.send(_addData(req.app.get('db'), 
                         req.app.get('config').db.DataCollectionPrefix + req.params.id, 
                         req.body["value"], 
                         new Date()));
@@ -67,7 +66,7 @@ define(function(require, exports, module) {
 
       while (actualDate <= endDate){
           // console.log("actualDate Date: " + actualDate);
-          addData(req.app.get('db'), 
+          _addData(req.app.get('db'), 
                 req.app.get('config').db.DataCollectionPrefix + req.params.id, 
                 Math.floor(Math.random() * 16) + 1  , 
                 actualDate);
