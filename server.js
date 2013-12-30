@@ -75,7 +75,19 @@ requirejs([ 'http',
         })
       });
 
+      /*
+        Pre create document 
+      */
+      // Create Documents for today
+      Data.preAllocateDataDocumentForDay(db, new Date());
+      // Document for tomorrow
+      Data.preAllocateDataDocumentForDay(db, new Date(new Date().getTime() + 24 * 60 * 60 * 1000));
+      setInterval(function(){
+        console.log("create new Documents for next day");
+        Data.preAllocateDataDocumentForDay(db, new Date());
+      }, 24*60*60*1000);
       
+
       // Start http server
       var server = Http.createServer(app).listen(Config.ZaehlerJS.server.Port, function() {
         console.log('\u001b[32mZählerJS listening on port \u001b[33m%d\033[0m', Config.ZaehlerJS.server.Port);
