@@ -10,6 +10,7 @@
  * @see http://requirejs.org/docs/node.html
  */
 var requirejs = require('requirejs');
+var Data = require('./routes/data');
 requirejs.config({
   nodeRequire: require
 });
@@ -65,22 +66,6 @@ requirejs([ 'http',
 
           });
       });
-
-      /*
-        Pre create document 
-      */
-      // Create Documents for today
-      // Data.preAllocateDataDocumentForDay(db, new Date());
-      
-      // Document for tomorrow
-      Data.preAllocateDataDocumentForDay(db, new Date(new Date().getTime() + 24*60*60*1000));
-
-      // Create evey 24 hours documents for the next day
-      setInterval(function(){
-        console.log("create new Documents for next day");
-        Data.preAllocateDataDocumentForDay(db, new Date(new Date().getTime() + 24*60*60*1000));
-      }, 24*60*60*1000);
-      
 
       // Start http server
       var server = Http.createServer(app).listen(Config.ZaehlerJS.server.Port, function() {

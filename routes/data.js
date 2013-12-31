@@ -2,6 +2,8 @@ if (typeof define !== 'function') {
     var define = require('amdefine')(module);
 }
 var BSON = require('mongodb').BSONPure;
+var async = require('async');
+
 
 Date.prototype.addHours= function(h){
     this.setHours(this.getHours()+h);
@@ -25,12 +27,15 @@ define(function(require, exports, module) {
             filter    = {'metadata.channel': new BSON.ObjectID(channelId)},
             db        = req.app.get('db'),
             aggregationFields = {},
-            getDataFrom = 'minute';
+            getDataFrom = 'day';
 
 
         if (start && end) {
-            filter = { $and: [
-                { 'metadata.date': { $gte: start} }, { 'metadata.date': { $lt: end}}] };
+            filter = { 
+                $and: [
+                    { 'metadata.date': { $gte: start} }, 
+                    { 'metadata.date': { $lt: end}}]
+                };
 
             if(end - start <= limit * 60 * 100 ){
                 // on item per miunte
@@ -41,12 +46,12 @@ define(function(require, exports, module) {
             }
         }
 
-        console.log(filter);
+        // console.log(filter);
         db.collection('data', function(err, collection) {
             var itemsArray = [];
             var cursor = collection.find(filter, aggregationFields).sort( { date: 1 } );
 
-            // console.log(JSON.stringify(filter));
+            console.log(JSON.stringify(filter));
             // console.log("search data");
 
             cursor.each(function(err, item) {
@@ -56,6 +61,8 @@ define(function(require, exports, module) {
                 }else{
                     // console.log(item['hourly']);
                     // var itemValue;
+
+                    // TODO : Add data per day
                     switch(getDataFrom){
                         case 'hour': 
                             Object.keys(item['hourly']).forEach(function(hour){
@@ -79,7 +86,6 @@ define(function(require, exports, module) {
                                 })
                             }); 
                     }
-                    
                 }
             });
         });
@@ -96,10 +102,18 @@ define(function(require, exports, module) {
     }
 
     exports.addData = function(req, res) {
-        res.send(_addData(req.app.get('db'), 
+        _addData(req.app.get('db'), 
                         req.params.id, 
                         req.body["value"], 
-                        new Date()));
+                        new Date(), function(err, result){
+            if (err) {
+                // TODO send 500 Header;
+                res.send(err);
+            } else {
+                res.send( result );
+            }
+            
+        });
     }
 
     exports.addDemoData = function(req, res) {
@@ -107,23 +121,51 @@ define(function(require, exports, module) {
         var actualDate = new Date();        // Now - 1year
         actualDate.setYear(endDate.getFullYear() - 1 );
 
-        while (actualDate <= endDate){
-            // console.log("actualDate Date: " + actualDate);
-            _addData(req.app.get('db'), 
-                req.params.id, 
-                Math.floor(Math.random() * 16) + 1  , 
-                actualDate);
-            actualDate.setUTCHours(actualDate.getUTCHours() + 1); // + 1 hour
-        };
-        res.send(true);
+        async.whilst(
+            function () { return actualDate <= endDate; },
+            function (callback) {
+                _addData(req.app.get('db'), 
+                    req.params.id, 
+                    Math.floor(Math.random() * 16) + 1  , 
+                    actualDate,function(){
+                        actualDate.setUTCHours(actualDate.getUTCHours() + 1); // + 1 hour
+                        callback(); 
+                    });
+            },
+            function (err) {
+                res.send(true);
+            }
+        );      
+    }
+
+    /*
+    merge two object literals, if properties exist in both objects, the data takes precedence.
+    */
+    function _mergeConfig(template, data) {
+        var obj = {};
+
+        for (var x in template)
+        if (template.hasOwnProperty(x))
+        obj[x] = template[x];
+
+        for (var x in data)
+        if (data.hasOwnProperty(x))
+        obj[x] = data[x];
+
+        return obj;
+    }
+
+    _createDocumentId = function(year, month, day, channel){
+        return String(year) + ("0" + (month + 1)).slice(-2) +   ("0" + (day + 1)).slice(-2) + "/" + channel;
     }
 
     // see http://docs.mongodb.org/ecosystem/use-cases/pre-aggregated-reports/
-    _preAllocateDataDocument = function(db, channel, date){
+    _preAllocateDataDocument = function(db, channel, date, callback){
+
         var day = date.getUTCDate(),
             month = date.getUTCMonth(),
             year = date.getUTCFullYear();
-        var idDay = String(year) + String(month) +  String(day) + "/" + channel;
+        var idDay = _createDocumentId(year, month, day, channel);
 
         var query = {
             '_id': idDay,
@@ -139,7 +181,7 @@ define(function(require, exports, module) {
                 'date': new Date(year, month, day), 
                 'channel': channel
             },
-            'day': 0,
+            'day': 0.0,
             'hourly': {},
             'minute': {}
         }
@@ -150,32 +192,87 @@ define(function(require, exports, module) {
                 data['minute'][hour][minute] = 0.0;
             }
         }
-        return _updateDocument(db, query, data);
+        _createDocument(db, query, data, function(err,result){
+            if (err) {
+                typeof callback === 'function' && callback(err,null);
+            }else{
+                typeof callback === 'function' && callback(null,result);
+            }
+        });
     }
 
-    _updateDocument = function(db, query, data){
+    /*
+        Update document, if document does not exist create a new document
+    */
+    _updateDocument = function(db, query, data, date, channel, callback){
+
+        _writeDocument(db, query, data, function(err,result){
+            if (err) {
+                // console.log("error updating document");
+                // could not update, so try to create the document
+                _preAllocateDataDocument(db, channel, date, function(err,result){
+                    if (err) {
+                        console.log('Error creating document: ' + err);
+                        typeof callback === 'function' && callback(err,null);
+                    }else{
+                        // Now, the document exist, so we can update the docuemnt
+                        // TODO: Optimize this, and try to write the data in the _preAllocateDataDocument function
+                        _writeDocument(db, query, data, function(err,result){
+                            if(err){
+                                console.log('Error giving up to creating document: ' + err);
+                                typeof callback === 'function' && callback(err,null);
+                            }else{
+                                // console.log("created Document");
+                                typeof callback === 'function' && callback(null,result);
+                            }
+                        });
+
+                    }
+                }, data);
+            } else {
+                // console.log("updated document");
+                typeof callback === 'function' && callback(null,result);
+            }
+        },{safe:true})       
+    }
+
+    /*
+        create a new document with default values
+    */
+    _createDocument = function(db, query, data, callback){       
+        _writeDocument(db, query, data, function(err,result){
+            if (err) {
+                console.log('Error creating document: ' + err);
+                typeof callback === 'function' && callback(err,null);
+            } else {
+                typeof callback === 'function' && callback(null,result);
+            }
+        },{upsert:true, safe:true})
+    }
+
+    _writeDocument = function(db, query, data, callback, mode){
+        mode = (typeof mode === "undefined") ? {upsert:true, safe:true} : mode;
         // Update daily statisics 
         db.collection('data', function(err, collection) {
-            collection.update(query, data, {upsert:true, safe:true}, function(err, result) {
-                if (err) {
-                    console.log('Error updating channel: ' + err);
-                    // TODO set 500 header here
-                    return ({'error':'An error has occurred'});
+            collection.update(query, data, mode, function(err, result) {
+                if (err || !result) {
+                    // console.log('Error writing document channel: ' + err);
+                    err = err ? err : 'document not found';
+                    typeof callback === 'function' && callback(err,null);
                 } else {
-                    // console.log('' + result + ' document(s) updated');
-                    return(true);
+                    typeof callback === 'function' && callback(null,result);
                 }
             });
         });
     }
 
-    _addData = function(db, channel, value, date){
+    _addData = function(db, channel, value, date, callback){
         var minute = date.getUTCMinutes(),
             hour = date.getUTCHours();
             day = date.getUTCDate(),
             month = date.getUTCMonth(),
             year = date.getUTCFullYear();
-        var idDay = String(year) + String(month) +  String(day) + "/" + channel;
+        var idDay = _createDocumentId(year, month, day, channel);
 
         var query = {
             '_id': idDay
@@ -186,7 +283,13 @@ define(function(require, exports, module) {
         update['$inc']['hourly.'+String(hour)] = value;
         update['$inc']['minute.'+String(hour)+"."+String(minute)] = value;
 
-        return _updateDocument(db, query, update);
+        _updateDocument(db, query, update, date, channel, function(result, err){
+            if (err) {
+                typeof callback === 'function' && callback(err,null);
+            } else {
+                typeof callback === 'function' && callback(null,result);
+            }
+        })
     }
 });
 
