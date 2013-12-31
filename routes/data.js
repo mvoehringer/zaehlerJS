@@ -24,18 +24,20 @@ define(function(require, exports, module) {
             start     = req.query['start'] ? new Date(req.query['start']) : null,
             end       = req.query['end'] ? new Date(req.query['end']) : null,
             limit     = req.query.limit ? parseInt(req.query.limit) : 500,
-            filter    = {'metadata.channel': new BSON.ObjectID(channelId)},
+            filter    = {  
+                        $and: [
+                            {'metadata.channel': channelId }
+                        ]},
             db        = req.app.get('db'),
             aggregationFields = {},
             getDataFrom = 'day';
 
 
         if (start && end) {
-            filter = { 
-                $and: [
+            filter["$and"].push(
                     { 'metadata.date': { $gte: start} }, 
-                    { 'metadata.date': { $lt: end}}]
-                };
+                    { 'metadata.date': { $lt: end}}
+                );
 
             if(end - start <= limit * 60 * 100 ){
                 // on item per miunte
@@ -49,7 +51,7 @@ define(function(require, exports, module) {
         // console.log(filter);
         db.collection('data', function(err, collection) {
             var itemsArray = [];
-            var cursor = collection.find(filter, aggregationFields).sort( { date: 1 } );
+            var cursor = collection.find(filter, aggregationFields).sort( { 'metadata.date': 1 } );
 
             console.log(JSON.stringify(filter));
             // console.log("search data");
@@ -59,19 +61,14 @@ define(function(require, exports, module) {
                 if(item == null) {
                     res.send(itemsArray);
                 }else{
-                    // console.log(item['hourly']);
-                    // var itemValue;
-
-                    // TODO : Add data per day
                     switch(getDataFrom){
                         case 'hour': 
                             Object.keys(item['hourly']).forEach(function(hour){
                                 var date = new Date(item['metadata']['date']).addHours(hour);
                                 var value = item['hourly'][hour];
-                                if(value){
-                                    itemsArray.push( [date.toJSON(), value]);
-                                }
-                            }); 
+                                _pushValueToArray(data, value, itemsArray);
+                            });
+                            break;
                         case 'minute': 
                             // console.log(item['minute']);
                             Object.keys(item['minute']).forEach(function(hour){
@@ -80,16 +77,26 @@ define(function(require, exports, module) {
                                     var date = new Date(item['metadata']['date']).addHours(hour).addMinutes(minute);
                                     var value = item['minute'][hour][minute];
                                     // console.log(value);
-                                    if(value){
-                                        itemsArray.push( [date.toJSON(), value]);
-                                    }
+                                    _pushValueToArray(date, value, itemsArray);
                                 })
-                            }); 
+                            });
+                            break;
+                        case 'day':
+                        default:
+                            // Default is Day
+                            _pushValueToArray(item['metadata']['date'], item['day'], itemsArray);
+
                     }
                 }
             });
         });
     };
+
+    _pushValueToArray = function (date, value, itemsArray){
+        if(value){
+            itemsArray.push( [date.toJSON(), value]);
+        }
+    }
 
     exports.preAllocateDataDocumentForDay = function(db, date){
         db.collection('channels', function(err, collection) {
@@ -110,7 +117,7 @@ define(function(require, exports, module) {
                 // TODO send 500 Header;
                 res.send(err);
             } else {
-                res.send( result );
+                res.send(result );
             }
             
         });
