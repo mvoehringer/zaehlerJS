@@ -10,7 +10,6 @@
  * @see http://requirejs.org/docs/node.html
  */
 var requirejs = require('requirejs');
-var Data = require('./routes/data');
 requirejs.config({
   nodeRequire: require
 });

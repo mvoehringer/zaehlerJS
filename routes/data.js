@@ -14,6 +14,8 @@ Date.prototype.addMinutes= function(m){
     this.setMinutes(this.getMinutes()+m);
     return this;
 }
+
+
 define(function(require, exports, module) {
     /*
     @param start startdate for filter
@@ -21,8 +23,8 @@ define(function(require, exports, module) {
     */
     exports.find = function(req, res) {
         var channelId = req.params.id,
-            start     = req.query['start'] ? new Date(req.query['start']) : null,
-            end       = req.query['end'] ? new Date(req.query['end']) : null,
+            start     = _createDate(req.query['start']),
+            end       = _createDate(req.query['end']),
             limit     = req.query.limit ? parseInt(req.query.limit) : 500,
             filter    = {  
                         $and: [
@@ -32,17 +34,20 @@ define(function(require, exports, module) {
             aggregationFields = {},
             getDataFrom = 'day';
 
+        // console.log(start);
+        // console.log(end);
 
         if (start && end) {
             filter["$and"].push(
                     { 'metadata.date': { $gte: start} }, 
                     { 'metadata.date': { $lt: end}}
                 );
-
-            if(end - start <= limit * 60 * 100 ){
+           
+            if(end - start <= limit * 60 * 1000 ){
                 // on item per miunte
                 getDataFrom = 'minute';
-            }else if(end - start <= limit * 60 * 60 * 100 ){
+            }else if(end - start <= limit * 60 * 60 * 1000 ){
+                // 237 877 159
                 // on item per houre
                 getDataFrom = 'hour';
             }
@@ -53,8 +58,8 @@ define(function(require, exports, module) {
             var itemsArray = [];
             var cursor = collection.find(filter, aggregationFields).sort( { 'metadata.date': 1 } );
 
-            console.log(JSON.stringify(filter));
-            // console.log("search data");
+            // console.log(JSON.stringify(filter));
+            // console.log(getDataFrom);
 
             cursor.each(function(err, item) {
                 // If the item is null then the cursor is exhausted/empty and closed
@@ -66,7 +71,7 @@ define(function(require, exports, module) {
                             Object.keys(item['hourly']).forEach(function(hour){
                                 var date = new Date(item['metadata']['date']).addHours(hour);
                                 var value = item['hourly'][hour];
-                                _pushValueToArray(data, value, itemsArray);
+                                _pushValueToArray(date, value, itemsArray);
                             });
                             break;
                         case 'minute': 
@@ -91,6 +96,27 @@ define(function(require, exports, module) {
             });
         });
     };
+
+    _createDate = function(string){
+
+        var date = new Date(string);
+        if ( Object.prototype.toString.call(date) === "[object Date]" ) {
+            if ( isNaN( date.getTime() ) ) {  // d.valueOf() could also work
+                // date is not valid
+                date = new Date(Math.round(string));
+                if ( Object.prototype.toString.call(date) === "[object Date]" ) {
+                    if ( !isNaN( date.getTime() ) ) {  // d.valueOf() could also work
+                        return date;
+                    }
+                }
+            }else {
+                // date is valid
+                return date;
+            }
+        }
+
+        return null;
+    }
 
     _pushValueToArray = function (date, value, itemsArray){
         if(value){

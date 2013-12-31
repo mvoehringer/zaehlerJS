@@ -35,6 +35,9 @@ window.HomeView = Backbone.View.extend({
 							that.chart.addSeries({
 								name: model.get('name'),
 								data: dataArray,
+								channelId:  model.get('_id'),
+								channelUrl: dataList.url,
+							
 								marker : { 
 									enabled : false,
 									radius: '2px'
@@ -55,7 +58,7 @@ window.HomeView = Backbone.View.extend({
         return this;
     },
 
-    getChartOptions:function () {
+    getChartOptions: function () {
     	// Configure chart
     	return {
 			chart: {
@@ -84,6 +87,7 @@ window.HomeView = Backbone.View.extend({
 			},
 			xAxis: {        
 				type: 'datetime',
+				minRange: 3600 * 1000, // one hour
 				labels: {
 					dateTimeLabelFormats: {
 						minute: '%H:%M',
@@ -93,9 +97,51 @@ window.HomeView = Backbone.View.extend({
 						month: '%b \'%y',
 						year: '%Y'
 					}
+				},
+				events: {
+					afterSetExtremes: function(e) {
+						var url,
+							currentExtremes = this.getExtremes();
+						var chart = $('#chart').highcharts();
+						var min = 0;
+					    var max =  new Date();
+				
+					    if(!isReset){
+					        min = e.min;
+					        max = e.max;
+					    }
+
+						// console.log("afterSetExtremes");
+						chart.showLoading('Loading data from server...');
+
+						chart.series.forEach(function(serie){
+							$.getJSON(serie.options.channelUrl, {
+								start: Math.round(min),
+								end:   Math.round(max)
+							}).done(function( data ) {
+								var dataArray = [];
+								data.forEach(function(date){
+									dataArray.push([ Date.parse(date[0]), date[1]]);
+								})
+								if(dataArray.length > 2){
+									chart.series[ serie._i ].setData(dataArray);
+								}
+								chart.hideLoading();
+							});
+						});
+
+					},
+					setExtremes: function (e) {
+                        if (e.max == null || e.min == null) {
+                           isReset = true;                            
+                        }
+                        else
+                        {
+                         isReset = false;   
+                        }
+                    }
 				}
 			}
 		};
     },
-
 });
