@@ -29,7 +29,7 @@ define(function(require, exports, module) {
         var channelId = req.params.id,
             start     = _createDate(req.query['start']),
             end       = _createDate(req.query['end']),
-            limit     = req.query.limit ? parseInt(req.query.limit) : 500,
+            limit     = req.query['limit'] ? parseInt(req.query['limit']) : 500,
             filter    = {  
                         $and: [
                             {'metadata.channel': channelId }
@@ -37,9 +37,6 @@ define(function(require, exports, module) {
             db        = req.app.get('db'),
             aggregationFields = {minute:false, hourly:false},
             getDataFrom = 'day';
-
-        // console.log(start);
-        // console.log(end);
 
         if (start && end) {
             filter["$and"].push(
@@ -58,7 +55,7 @@ define(function(require, exports, module) {
             }
         }
 
-        console.log(filter);
+        // console.log(filter);
         db.collection('data', function(err, collection) {
             var itemsArray = [];
             var cursor = collection.find(filter, aggregationFields).sort( { 'metadata.date': 1 } );
@@ -119,8 +116,6 @@ define(function(require, exports, module) {
         return null;
     }
 
-
-
     exports.preAllocateDataDocumentForDay = function(db, date){
         db.collection('channels', function(err, collection) {
             collection.find().each(function(err, item){
@@ -145,12 +140,11 @@ define(function(require, exports, module) {
                         value, 
                         date, function(err, result){
             if (err) {
-                // TODO send 500 Header;
-                res.send(err);
+                console.error(err);
+                res.send(500, err);
             } else {
-                res.send(result );
-            }
-            
+                res.send(result);
+            }            
         });
     }
 
@@ -321,7 +315,7 @@ define(function(require, exports, module) {
         update['$inc']['hourly.'+String(hour)] = value;
         update['$inc']['minute.'+String(hour)+"."+String(minute)] = value;
 
-        _updateDocument(db, query, update, date, channel, function(result, err){
+        _updateDocument(db, query, update, date, channel, function(err, result){
             if (err) {
                 typeof callback === 'function' && callback(err,null);
             } else {
