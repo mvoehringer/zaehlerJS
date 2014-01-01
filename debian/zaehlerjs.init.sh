@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # ------------------------------------------------------------------------------ 
 # SOME INFOS : fairly standard (debian) init script.
 #                 Note that node doesn't create a PID file (hence --make-pidfile) 
@@ -57,12 +57,14 @@
 # PATH should only include /usr/* if it runs after the mountnfs.sh script
 PATH=/sbin:/usr/sbin:/bin:/usr/bin:/usr/local/bin # modify if you need
 
-DAEMON_ARGS="/home/to/app.js"               # path to your node.js server/app
+DAEMON_PATH="/opt/zaehlerjs/"
+
+DAEMON_ARGS="$DAEMON_PATH/serverjs"         # path to your node.js server/app
                                             # NB: don't use ~/ in path
 
-DESC="node.js http server"                  # whatever fancy description you like
+DESC="zähler.js http server"                # whatever fancy description you like
 
-NODEUSER=myuser:mygroup                     # USER who OWNS the daemon process (no matter whoever runs the init script)
+NODEUSER=pi                     			# USER who OWNS the daemon process (no matter whoever runs the init script)
                                             # user:group (if no group is specified, the primary GID for that user is used)
 
 LOCAL_VAR_RUN=/usr/local/var/run            # in case the init script is run by non-root user, you need to
@@ -72,15 +74,14 @@ LOCAL_VAR_RUN=/usr/local/var/run            # in case the init script is run by 
                                             #      2) node, npm,... are best NOT installed/run as ROOT.
                                             #         (see here: https://github.com/isaacs/npm/blob/master/README.md)
 
-NAME=node                                   # name of the node.js executable
-DAEMON=/usr/local/bin/$NAME                 # this SHOULD POINT TO where your node executable is
+DAEMON="$DAEMON_PATH/bin/run.sh"            # this SHOULD POINT TO where your node executable is
+
+
 #
 #                                                                              #
 #                   END </MODIFY TO REFLECT YOUR SETTINGS>                     #
 #                (Nothing else to modify from this point on...)                #
 # ------------------------------------------------------------------------------ 
-
-
 
 
 
@@ -118,6 +119,13 @@ SCRIPTNAME=/etc/init.d/$INIT_SCRIPT_NAME
 #
 do_start()
 {
+	APPLOG_FILE="/var/log/node/$INIT_SCRIPT_NAME_NOEXT.log"
+	ERRLOG_FILE="/var/log/node/$INIT_SCRIPT_NAME_NOEXT.err.log"
+
+	if [ ! -a $APPLOGFILE ];then mkdir -p /var/log/node/;touch $APPLOG_FILE;fi
+	if [ ! -a $ERRLOGFILE ];then mkdir -p /var/log/node/;touch $ERRLOG_FILE;fi
+	chown -R $NODEUSER /var/log/node/
+
 	# Return
 	#   0 if daemon has been started
 	#   1 if daemon was already running
@@ -125,8 +133,8 @@ do_start()
 	start-stop-daemon --start --quiet --pidfile $PIDFILE --chuid $NODEUSER --background --exec $DAEMON --test > /dev/null \
 		|| { [ "$VERBOSE" != no ] && log_daemon_msg  "  --->  Daemon already running $DESC" "$INIT_SCRIPT_NAME_NOEXT"; return 1; }
 	start-stop-daemon --start --quiet --chuid $NODEUSER --make-pidfile --pidfile $PIDFILE --background --exec $DAEMON -- \
-		$DAEMON_ARGS \
-		|| { [ "$VERBOSE" != no ] && log_daemon_msg  "  --->  could not be start $DESC" "$INIT_SCRIPT_NAME_NOEXT"; return 2; }
+		$DAEMON_ARGS $APPLOG_FILE $ERRLOG_FILE $DAEMON_PATH \
+		|| { [ "$VERBOSE" != no ] && log_daemon_msg " ---> could not be start $DESC" "$INIT_SCRIPT_NAME_NOEXT"; return 2; }
 	# Add code here, if necessary, that waits for the process to be ready
 	# to handle requests from services started subsequently which depend
 	# on this one.  As a last resort, sleep for some time.
@@ -143,7 +151,7 @@ do_stop()
 	#   1 if daemon was already stopped
 	#   2 if daemon could not be stopped
 	#   other if a failure occurred
-	start-stop-daemon --stop --quiet --retry=TERM/30/KILL/5 --pidfile $PIDFILE  --chuid $NODEUSER --name $DAEMON
+	start-stop-daemon --stop --quiet --retry=TERM/30/KILL/5 --pidfile $PIDFILE  --chuid $NODEUSER --exec $DAEMON
 	RETVAL="$?"
 	#[ "$VERBOSE" != no ] && [ "$RETVAL" = 1 ] && log_daemon_msg  "  --->  SIGKILL failed => hardkill $DESC" "$INIT_SCRIPT_NAME_NOEXT"
 	[ "$RETVAL" = 2 ] && return 2
@@ -171,7 +179,7 @@ do_reload() {
 	# restarting (for example, when it is sent a SIGHUP),
 	# then implement that here.
 	#
-	start-stop-daemon --stop --quiet --signal 1 --pidfile $PIDFILE  --chuid $NODEUSER --name $NAME
+	start-stop-daemon --stop --quiet --signal 1 --pidfile $PIDFILE  --chuid $NODEUSER --exec $NAME
 	return 0
 }
 
