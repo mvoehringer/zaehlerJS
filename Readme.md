@@ -61,11 +61,20 @@ sudo service mongodb start
 
 
  ### Install ZählerJS
+  * cd /opt/
   * git clone  https://github.com/mvoehringer/zaehlerjs
   * cd zaehlerjs
   * npm config set registry http://registry.npmjs.org/
   * npm install
-  * npm update
+
+ ####  On Raspberry PI /Debian
+  * sudo cp -a debian/zaehlerjs.init.sh /etc/init.d/zaehlerjs
+  * sudo chmod +x /etc/init.d/zaehlerjs
+  * sudo mkdir /usr/local/var
+  * sudo mkdir /usr/local/var/run
+  * sudo update-rc.d zaehlerjs defaults
+  * sudo chmod +x bin/run.sh
+
 
   * sudo iptables -A PREROUTING -t nat -i eth0 -p tcp --dport 80 -j REDIRECT --to-port 3000 
     OR 
@@ -83,10 +92,8 @@ or
 }}}
 
 
-
 ## TODOs
  * GIPO Ports direkt auslesen
  * Websockets zum Realtime anzeigen 
  * Tests für alles
- * Data Results beschränken und aggregieren
  * Grafen mit Zomm-In/Zoom-Out 
