@@ -129,23 +129,52 @@ define(function(require, exports, module) {
     exports.addData = function(req, res) {
         var value  = (typeof req.body["value"] === "undefined") ? 1 : req.body["value"];
         var date  = (typeof req.params.date === "undefined") ? new Date() : _createDate(req.params.date);
-        
+        var db = req.app.get('db');
+        var channel = req.params.id;
+
+        _saveTuple = function(item, callback){
+            var db = req.app.get('db');
+            var value = item[1];
+            var date = _createDate(Math.round(item[0]));
+            // console.log(item);
+            _addData(db, 
+                    channel, 
+                    value, 
+                    date, function(err, result){
+                        callback(err);
+            });
+        }
+
         // fallback for the voelkszaehler.org middleware
         if(typeof req.params.ts !== "undefined"){
             date = _createDate(req.params.ts);
         }
 
-        _addData(req.app.get('db'), 
-                        req.params.id, 
-                        value, 
-                        date, function(err, result){
-            if (err) {
-                console.error(err);
-                res.send(500, err);
-            } else {
-                res.send(200, "true");
-            }            
-        });
+        if( Object.prototype.toString.call( req.body[0] ) === '[object Array]' ) {
+            // voelkszaehler.org tuples 
+            async.each(req.body, _saveTuple, function(err){
+                if (err) {
+                    console.error(err);
+                    res.send(500, err);
+                } else {
+                    res.send(200, "true");
+                } 
+            
+            });
+        }else{
+            // Use offical zaehlerjs API
+            _addData(db, 
+                    channel, 
+                    value, 
+                    date, function(err, result){
+                if (err) {
+                    console.error(err);
+                    res.send(500, err);
+                } else {
+                    res.send(200, "true");
+                }            
+            });
+        }
     }
 
     exports.addDemoData = function(req, res) {
