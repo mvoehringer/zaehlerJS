@@ -2,7 +2,6 @@ if (typeof define !== 'function') {
     var define = require('amdefine')(module);
 }
 
-var BSON = require('mongodb').BSONPure;
 var uuid = require('node-uuid');
 
 define(function(require, exports, module) {
@@ -26,7 +25,7 @@ define(function(require, exports, module) {
       var id = req.params.id;
       console.log('Retrieving channels: ' + id);
       req.app.get('db').collection('channels', function(err, collection) {
-          collection.findOne({'_id':new BSON.ObjectID(id)}, function(err, item) {
+          collection.findOne({'_id':id}, function(err, item) {
               res.send(item);
           });
       });
@@ -56,7 +55,7 @@ define(function(require, exports, module) {
       console.log(JSON.stringify(channel));
 
       req.app.get('db').collection('channels', function(err, collection) {
-          collection.update({'_id':new BSON.ObjectID(id)}, channel, {safe:true}, function(err, result) {
+          collection.update({'_id':id}, channel, {safe:true}, function(err, result) {
               if (err) {
                   console.log('Error updating channel: ' + err);
                   res.send({'error':'An error has occurred'});
@@ -72,11 +71,12 @@ define(function(require, exports, module) {
       var id = req.params.id;
       console.log('Deleting channel ' + id);
       req.app.get('db').collection('channels', function(err, collection) {
-          collection.remove({'_id':new BSON.ObjectID(id)}, {safe:true}, function(err, result) {
+          collection.remove({'_id':id}, {safe:true}, function(err, result) {
               if (err) {
                   res.send({'error':'An error has occurred - ' + err});
               } else {
                   console.log('' + result + ' document(s) deleted');
+                  // TODO remove all data of this channes
                   res.send(req.body);
               }
           });
