@@ -3,6 +3,7 @@ if (typeof define !== 'function') {
 }
 
 var BSON = require('mongodb').BSONPure;
+var uuid = require('node-uuid');
 
 define(function(require, exports, module) {
   exports.findAll = function(req, res) {
@@ -33,6 +34,8 @@ define(function(require, exports, module) {
 
   exports.addChannel = function(req, res) {
       var channel = req.body;
+      channel['_id']= uuid.v4();
+
       console.log('Adding channel ' + JSON.stringify(channel));
       req.app.get('db').collection('channels', function(err, collection) {
           collection.insert(channel, {safe:true}, function(err, result) {

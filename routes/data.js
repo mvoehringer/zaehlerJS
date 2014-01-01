@@ -135,10 +135,18 @@ define(function(require, exports, module) {
     }
 
     exports.addData = function(req, res) {
+        var value  = (typeof req.body["value"] === "undefined") ? 1 : req.body["value"];
+        var date  = (typeof req.params.date === "undefined") ? new Date() : _createDate(req.params.date);
+        
+        // fallback for the voelkszaehler.org middleware
+        if(typeof req.params.ts !== "undefined"){
+            date = _createDate(req.params.ts);
+        }
+
         _addData(req.app.get('db'), 
                         req.params.id, 
-                        req.body["value"], 
-                        new Date(), function(err, result){
+                        value, 
+                        date, function(err, result){
             if (err) {
                 // TODO send 500 Header;
                 res.send(err);

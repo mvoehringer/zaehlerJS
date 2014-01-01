@@ -91,6 +91,7 @@ requirejs([ 'http',
       app.delete('/channels/:id', Channels.deleteChannel);
 
       app.post('/data/:id', Data.addData);
+      app.post('/data/:id.json', Data.addData);
       app.post('/data/demo/:id', Data.addDemoData);
       app.get('/data/:id', Data.find);
 
