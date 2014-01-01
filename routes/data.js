@@ -1,7 +1,6 @@
 if (typeof define !== 'function') {
     var define = require('amdefine')(module);
 }
-var BSON = require('mongodb').BSONPure;
 var async = require('async');
 
 
@@ -22,6 +21,11 @@ define(function(require, exports, module) {
     @param end enddate for filter
     */
     exports.find = function(req, res) {
+        _pushValueToArray = function (date, value, itemsArray){
+            if(value){
+                itemsArray.push( [date.toJSON(), value]);
+            }
+        }
         var channelId = req.params.id,
             start     = _createDate(req.query['start']),
             end       = _createDate(req.query['end']),
@@ -31,7 +35,7 @@ define(function(require, exports, module) {
                             {'metadata.channel': channelId }
                         ]},
             db        = req.app.get('db'),
-            aggregationFields = {},
+            aggregationFields = {minute:false, hourly:false},
             getDataFrom = 'day';
 
         // console.log(start);
@@ -46,20 +50,18 @@ define(function(require, exports, module) {
             if(end - start <= limit * 60 * 1000 ){
                 // on item per miunte
                 getDataFrom = 'minute';
+                aggregationFields = {day:false, hourly:false};
             }else if(end - start <= limit * 60 * 60 * 1000 ){
-                // 237 877 159
                 // on item per houre
                 getDataFrom = 'hour';
+                aggregationFields = {minute:false, day:false};
             }
         }
 
-        // console.log(filter);
+        console.log(filter);
         db.collection('data', function(err, collection) {
             var itemsArray = [];
             var cursor = collection.find(filter, aggregationFields).sort( { 'metadata.date': 1 } );
-
-            // console.log(JSON.stringify(filter));
-            // console.log(getDataFrom);
 
             cursor.each(function(err, item) {
                 // If the item is null then the cursor is exhausted/empty and closed
@@ -90,7 +92,6 @@ define(function(require, exports, module) {
                         default:
                             // Default is Day
                             _pushValueToArray(item['metadata']['date'], item['day'], itemsArray);
-
                     }
                 }
             });
@@ -118,11 +119,7 @@ define(function(require, exports, module) {
         return null;
     }
 
-    _pushValueToArray = function (date, value, itemsArray){
-        if(value){
-            itemsArray.push( [date.toJSON(), value]);
-        }
-    }
+
 
     exports.preAllocateDataDocumentForDay = function(db, date){
         db.collection('channels', function(err, collection) {
@@ -160,7 +157,7 @@ define(function(require, exports, module) {
     exports.addDemoData = function(req, res) {
         var endDate = new Date(); // NOW
         var actualDate = new Date();        // Now - 1year
-        actualDate.setYear(endDate.getFullYear() - 1 );
+        actualDate.setYear(endDate.getFullYear() - 3 );
 
         async.whilst(
             function () { return actualDate <= endDate; },
@@ -169,7 +166,7 @@ define(function(require, exports, module) {
                     req.params.id, 
                     Math.floor(Math.random() * 16) + 1  , 
                     actualDate,function(){
-                        actualDate.setUTCHours(actualDate.getUTCHours() + 1); // + 1 hour
+                        actualDate.setUTCMinutes(actualDate.getUTCMinutes() + 1); // + 1 minute
                         callback(); 
                     });
             },
