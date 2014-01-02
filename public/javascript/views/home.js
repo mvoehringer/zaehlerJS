@@ -21,6 +21,11 @@ window.HomeView = Backbone.View.extend({
 				// defered loading of the chart
 				_(function() {
 			        that.chart = new Highcharts.Chart(that.chartOptions);
+					Highcharts.setOptions({                                            // This is for all plots, change Date axis to local timezone
+						global : {
+							useUTC : false
+						}
+					});
     			}).defer();
 				
 				// loading data
@@ -33,7 +38,7 @@ window.HomeView = Backbone.View.extend({
 							function _setSeries(response, data){
 								var dataArray = [];
 								response.forEach(function(date){
-									dataArray.push([ Date.parse(date[0]), date[1]]);
+									dataArray.push([ new Date(date[0]).getTime(), date[1]]);
 								})
 
 								that.chart.addSeries({
