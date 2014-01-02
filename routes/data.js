@@ -21,10 +21,14 @@ define(function(require, exports, module) {
     @param end enddate for filter
     */
     exports.find = function(req, res) {
-        _pushValueToArray = function (date, item, itemsArray){
-            if(item){
-                // TODO scale value based on item.count
-                itemsArray.push( [date.toJSON(), item.value]);
+        _pushValueToArray = function (date, item, itemsArray, minDate, maxDate){
+            // ignore values out of timeslice
+            if(date < maxDate || date >= minDate ){
+                // ignore empty values
+                if(item && item.value){
+                    // TODO scale value based on item.count
+                    itemsArray.push( [date.toJSON(), item.value]);
+                }
             }
         }
 
@@ -42,11 +46,20 @@ define(function(require, exports, module) {
             getDataFrom = 'day';
 
         if (start && end) {
+            
+            var filterStart = new Date(start.getTime()),
+                filterEnd = new Date(end.getTime());
+            // fetch minimum of one day if start 
+            if( start - end <= 24 * 60 * 60 * 1000  ){
+                filterStart.setHours(0,0,0,0);
+                fiterEnd = new Date(filterStart.getTime());
+                fiterEnd.addHours(24);
+            }
             filter["$and"].push(
-                    { 'metadata.date': { $gte: start} }, 
-                    { 'metadata.date': { $lt: end}}
+                    { 'metadata.date': { $gte: filterStart} }, 
+                    { 'metadata.date': { $lt: filterEnd}}
                 );
-           
+
             if(end - start <= limit * 60 * 1000 ){
                 // on item per miunte
                 getDataFrom = 'minute';
@@ -57,42 +70,45 @@ define(function(require, exports, module) {
                 aggregationFields = {minute:false, day:false};
             }
         }
-
-        // console.log(filter);
+        
         db.collection('data', function(err, collection) {
             var itemsArray = [];
+            // console.log(JSON.stringify(filter));
             var cursor = collection.find(filter, aggregationFields).sort( { 'metadata.date': 1 } );
 
             cursor.each(function(err, item) {
                 // If the item is null then the cursor is exhausted/empty and closed
                 if(item == null) {
-
                     res.send(itemsArray);
                 }else{
                     switch(getDataFrom){
-                        case 'hour': 
+                        case 'hour':
                             Object.keys(item['hourly']).forEach(function(hour){
-                                var date = new Date(item['metadata']['date']).addHours(hour);
+                                var date = new Date(item['metadata']['date']);
+                                date.setUTCHours(hour);
                                 var value = item['hourly'][hour];
-                                _pushValueToArray(date, value, itemsArray);
+                                _pushValueToArray(date, value, itemsArray, start, end);
                             });
                             break;
                         case 'minute': 
-                            // console.log(item['minute']);
+      
                             Object.keys(item['minute']).forEach(function(hour){
                                 // console.log(item['minute'][hour]);
                                 Object.keys(item['minute'][hour]).forEach(function(minute) {
-                                    var date = new Date(item['metadata']['date']).addHours(hour).addMinutes(minute);
+                                    var date = new Date(item['metadata']['date']);
+                                    date.setUTCHours(hour);
+                                    date.setUTCMinutes(minute);
+
                                     var value = item['minute'][hour][minute];
                                     // console.log(value);
-                                    _pushValueToArray(date, value, itemsArray);
+                                    _pushValueToArray(date, value, itemsArray, start, end);
                                 })
                             });
                             break;
                         case 'day':
                         default:
                             // Default is Day
-                            _pushValueToArray(item['metadata']['date'], item['day'], itemsArray);
+                            _pushValueToArray(item['metadata']['date'], item['day'], itemsArray, start, end);
                     }
                 }
             });
@@ -116,7 +132,6 @@ define(function(require, exports, module) {
                 return date;
             }
         }
-
         return null;
     }
 
@@ -140,7 +155,7 @@ define(function(require, exports, module) {
             var db = req.app.get('db');
             var value = item[1];
             var date = _createDate(Math.round(item[0]));
-            // console.log(item);
+
             _addData(db, 
                     channel, 
                     value, 
@@ -193,7 +208,7 @@ define(function(require, exports, module) {
                     req.params.id, 
                     Math.floor(Math.random() * 16) + 1  , 
                     actualDate,function(){
-                        actualDate.setUTCMinutes(actualDate.getUTCMinutes() + 1); // + 1 minute
+                        actualDate.setMinutes(actualDate.getMinutes() + 1); // + 1 minute
                         callback(); 
                     });
             },
@@ -221,21 +236,27 @@ define(function(require, exports, module) {
     }
 
     _createDocumentId = function(year, month, day, channel){
-        return String(year) + ("0" + (month + 1)).slice(-2) +   ("0" + (day + 1)).slice(-2) + "/" + channel;
+        return String(year) + ("0" + (month)).slice(-2) +   ("0" + (day)).slice(-2) + "/" + channel;
     }
 
     // see http://docs.mongodb.org/ecosystem/use-cases/pre-aggregated-reports/
     _preAllocateDataDocument = function(db, channel, date, callback){
 
         var day = date.getUTCDate(),
-            month = date.getUTCMonth(),
+            month = date.getUTCMonth()+1,
             year = date.getUTCFullYear();
         var idDay = _createDocumentId(year, month, day, channel);
+
+        var dayObject = date;
+        dayObject.setUTCHours(0);
+        dayObject.setUTCMinutes(0);
+        dayObject.setUTCSeconds(0);
+        dayObject.setUTCMilliseconds(0);
 
         var query = {
             '_id': idDay,
             'metadata': { 
-                'date': new Date(year, month, day), 
+                'date': dayObject, 
                 'channel': channel
             }
         }
@@ -243,7 +264,7 @@ define(function(require, exports, module) {
         var data = {
             '_id': idDay,
             'metadata': { 
-                'date': new Date(year, month, day), 
+                'date': dayObject, 
                 'channel': channel
             },
             'day': {
@@ -342,10 +363,9 @@ define(function(require, exports, module) {
         var minute = date.getUTCMinutes(),
             hour = date.getUTCHours();
             day = date.getUTCDate(),
-            month = date.getUTCMonth(),
+            month = date.getUTCMonth() + 1,
             year = date.getUTCFullYear();
         var idDay = _createDocumentId(year, month, day, channel);
-
         var query = {
             '_id': idDay
         };

@@ -1,3 +1,7 @@
+
+
+
+
 window.HomeView = Backbone.View.extend({
 
     initialize:function () {
@@ -26,23 +30,47 @@ window.HomeView = Backbone.View.extend({
 					dataList.url =  "/data/" +  model.get('_id');
 					dataList.fetch({
 						success: function (data, response) {
+							function _setSeries(response, data){
+								var dataArray = [];
+								response.forEach(function(date){
+									dataArray.push([ Date.parse(date[0]), date[1]]);
+								})
 
-							var dataArray = [];
-							response.forEach(function(date){
-								dataArray.push([ Date.parse(date[0]), date[1]]);
-							})
+								that.chart.addSeries({
+									name: model.get('name'),
+									data: dataArray,
+									channelId:  model.get('_id'),
+									channelUrl: dataList.url,
+								
+									marker : { 
+										enabled : false,
+										radius: '2px'
+									}
+								});
+							}
 
-							that.chart.addSeries({
-								name: model.get('name'),
-								data: dataArray,
-								channelId:  model.get('_id'),
-								channelUrl: dataList.url,
-							
-								marker : { 
-									enabled : false,
-									radius: '2px'
+							if(response.length > 1){
+								_setSeries(response, data);
+							}else{
+								if(response.length == 1){
+									// only one item returnd, try to fetch a more detail version
+									var dateToFetch = new Date(response[0][0]);
+
+									var dataList = new DataCollection(Data);
+									dataList.url =  "/data/" +  model.get('_id');
+									var search_params = {
+									  'start': dateToFetch.getTime(),
+									  'end':  dateToFetch.setHours(24)
+									};
+									dataList.fetch({
+										data: $.param(search_params),
+										success: function (data, response) {
+											_setSeries(response, data)
+										}
+									})
 								}
-							});
+
+							}
 
 						},
 						error: function() {
