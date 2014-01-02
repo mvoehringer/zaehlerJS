@@ -21,12 +21,15 @@ define(function(require, exports, module) {
     @param end enddate for filter
     */
     exports.find = function(req, res) {
-        _pushValueToArray = function (date, value, itemsArray){
-            if(value){
-                itemsArray.push( [date.toJSON(), value]);
+        _pushValueToArray = function (date, item, itemsArray){
+            if(item){
+                // TODO scale value based on item.count
+                itemsArray.push( [date.toJSON(), item.value]);
             }
         }
+
         var channelId = req.params.id,
+            // TODO: Set default fo date
             start     = _createDate(req.query['start']),
             end       = _createDate(req.query['end']),
             limit     = req.query['limit'] ? parseInt(req.query['limit']) : 500,
@@ -63,6 +66,7 @@ define(function(require, exports, module) {
             cursor.each(function(err, item) {
                 // If the item is null then the cursor is exhausted/empty and closed
                 if(item == null) {
+
                     res.send(itemsArray);
                 }else{
                     switch(getDataFrom){
@@ -242,15 +246,22 @@ define(function(require, exports, module) {
                 'date': new Date(year, month, day), 
                 'channel': channel
             },
-            'day': 0.0,
+            'day': {
+                value: 0,
+                count: 0
+            },
             'hourly': {},
             'minute': {}
         }
         for(hour=0; hour <24;hour ++){
-            data['hourly'][hour] = 0.0;
+            data['hourly'][hour] = {};
+            data['hourly'][hour]['value'] = 0;
+            data['hourly'][hour]['count'] = 0;
             data['minute'][hour] = {};
             for(minute=0;minute < 60;  minute++){
-                data['minute'][hour][minute] = 0.0;
+                data['minute'][hour][minute] = {};
+                data['minute'][hour][minute]['value'] = 0;
+                data['minute'][hour][minute]['count'] = 0;
             }
         }
         _createDocument(db, query, data, function(err,result){
@@ -340,9 +351,12 @@ define(function(require, exports, module) {
         };
         var update = {};
         update['$inc'] = {};
-        update['$inc']['day'] = value;
-        update['$inc']['hourly.'+String(hour)] = value;
-        update['$inc']['minute.'+String(hour)+"."+String(minute)] = value;
+        update['$inc']['day.value'] = value;
+        update['$inc']['day.count'] = 1;
+        update['$inc']['hourly.'+String(hour)+".value"] = value;
+        update['$inc']['hourly.'+String(hour)+".count"] = 1;
+        update['$inc']['minute.'+String(hour)+"."+String(minute)+".value"] = value;
+        update['$inc']['minute.'+String(hour)+"."+String(minute)+".count"] = 1;
 
         _updateDocument(db, query, update, date, channel, function(err, result){
             if (err) {
