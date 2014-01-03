@@ -21,7 +21,7 @@ window.HomeView = Backbone.View.extend({
 				// defered loading of the chart
 				_(function() {
 			        that.chart = new Highcharts.Chart(that.chartOptions);
-					Highcharts.setOptions({                                            // This is for all plots, change Date axis to local timezone
+					Highcharts.setOptions({  // This is for all plots, change Date axis to local timezone
 						global : {
 							useUTC : false
 						}
@@ -35,7 +35,7 @@ window.HomeView = Backbone.View.extend({
 					dataList.url =  "/data/" +  model.get('_id');
 					dataList.fetch({
 						success: function (data, response) {
-							function _setSeries(response, data){
+							function _setSeries(response, data, dataList){
 								var dataArray = [];
 								response.forEach(function(date){
 									dataArray.push([ new Date(date[0]).getTime(), date[1]]);
@@ -55,28 +55,26 @@ window.HomeView = Backbone.View.extend({
 							}
 
 							if(response.length > 1){
-								_setSeries(response, data);
+								_setSeries(response, data, dataList);
 							}else{
 								if(response.length == 1){
 									// only one item returnd, try to fetch a more detail version
 									var dateToFetch = new Date(response[0][0]);
 
-									var dataList = new DataCollection(Data);
-									dataList.url =  "/data/" +  model.get('_id');
+									var detailDataList = new DataCollection(Data);
+									detailDataList.url =  "/data/" +  model.get('_id');
 									var search_params = {
 									  'start': dateToFetch.getTime(),
 									  'end':  dateToFetch.setHours(24)
 									};
-									dataList.fetch({
+									detailDataList.fetch({
 										data: $.param(search_params),
 										success: function (data, response) {
-											_setSeries(response, data)
+											_setSeries(response, data, detailDataList)
 										}
 									})
 								}
-
 							}
-
 						},
 						error: function() {
 							console.log('Failed to fetch data!');

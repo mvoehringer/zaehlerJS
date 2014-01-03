@@ -12,14 +12,6 @@ define(function(require, exports, module) {
         });
     });
   };
-
-  exports.findAll = function(req, res) {
-      req.app.get('db').collection('channels', function(err, collection) {
-          collection.find().sort({ name: 1 }).toArray(function(err, items) {
-              res.send(items);
-          });
-      });
-  };
      
   exports.findById = function(req, res) {
       var id = req.params.id;
