@@ -369,6 +369,9 @@ define(function(require, exports, module) {
         var query = {
             '_id': idDay
         };
+
+        value = parseFloat(value);
+
         var update = {};
         update['$inc'] = {};
         update['$inc']['day.value'] = value;
