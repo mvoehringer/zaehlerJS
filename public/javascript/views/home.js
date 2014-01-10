@@ -21,7 +21,8 @@ window.HomeView = Backbone.View.extend({
 				// defered loading of the chart
 				_(function() {
 			        that.chart = new Highcharts.Chart(that.chartOptions);
-					Highcharts.setOptions({  // This is for all plots, change Date axis to local timezone
+					Highcharts.setOptions({  
+						// This is for all plots, change Date axis to local timezone
 						global : {
 							useUTC : false
 						}
@@ -30,6 +31,15 @@ window.HomeView = Backbone.View.extend({
 				
 				// loading data
 				_.each(channels.models, function(model) {
+
+					var socket = io.connect();
+					// Listen to new data on websocket
+					console.log('data-'+ model.get('_id'));
+					socket.on('data-' + model.get('_id'), function(data) {
+						console.log("recived data" + data);
+						$("#dataView").append('<div class="message">'+ data.date + ' - ' + data.channel + ' : ' + data.value + '</div>');
+					});
+
 					// console.log(model.get('name'));
 					var dataList = new DataCollection(Data);
 					dataList.url =  "/api/data/" +  model.get('_id');
@@ -89,6 +99,16 @@ window.HomeView = Backbone.View.extend({
 	             console.log('Failed to fetch!');
 	        }
    		});
+		$('#chart-now').on("click", function(){
+			// console.log( $( this ).text() );
+			console.log('click');
+		});
+		$('#chart-now').click(function(){
+			console.log("on click");
+		});
+
+
+
         return this;
     },
 

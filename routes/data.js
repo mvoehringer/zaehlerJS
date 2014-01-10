@@ -3,7 +3,6 @@ if (typeof define !== 'function') {
 }
 var async = require('async');
 
-
 Date.prototype.addHours= function(h){
     this.setHours(this.getHours()+h);
     return this;
@@ -182,6 +181,11 @@ define(function(require, exports, module) {
             });
         }else{
             // Use offical zaehlerjs API
+            req.app.get('EventEmitter').emit('addData', {
+                channel : channel, 
+                value: value, 
+                date: date
+            });
             _addData(db, 
                     channel, 
                     value, 

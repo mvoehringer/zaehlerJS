@@ -38,6 +38,8 @@ see http://c-mobberley.com/wordpress/index.php/2013/10/14/raspberry-pi-mongodb-i
  * sudo update-rc.d mongod defaults
  * sudo /etc/init.d/mongod start
 
+ * `sudo vi /etc/mongodb.conf`  -> smallfiles = true
+
 #### OR ####
 see https://github.com/RickP/mongopi and http://ni-c.github.io/heimcontrol.js/get-started.html
  * sudo apt-get install git-core build-essential scons libpcre++-dev xulrunner-dev libboost-dev libboost-program-options-dev libboost-thread-dev libboost-filesystem-dev
