@@ -1,6 +1,6 @@
 window.Channel = Backbone.Model.extend({
 
-    urlRoot: "/channels",
+    urlRoot: "/api/channels",
 
     idAttribute: "_id",
 
@@ -48,6 +48,6 @@ window.ChannelCollection = Backbone.Collection.extend({
 
     model: Channel,
 
-    url: "/channels"
+    url: "/api/channels"
 
 });

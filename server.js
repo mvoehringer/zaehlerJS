@@ -62,16 +62,16 @@ db.open(function(err, db) {
     });
     
     //  Configure routes
-    app.get('/channels', Channels.findAll);
-    app.get('/channels/:id', Channels.findById);
-    app.post('/channels', Channels.addChannel);
-    app.put('/channels/:id', Channels.updateChannel);
-    app.delete('/channels/:id', Channels.deleteChannel);
+    app.get('/api/channels', Channels.findAll);
+    app.get('/api/channels/:id', Channels.findById);
+    app.post('/api/channels', Channels.addChannel);
+    app.put('/api/channels/:id', Channels.updateChannel);
+    app.delete('/api/channels/:id', Channels.deleteChannel);
 
-    app.post('/data/:id.json', Data.addData);
-    app.post('/data/:id', Data.addData);
-    app.post('/data/demo/:id', Data.addDemoData);
-    app.get('/data/:id', Data.find);
+    app.post('/api/data/:id.json', Data.addData);
+    app.post('/api/data/:id', Data.addData);
+    app.post('/api/data/demo/:id', Data.addDemoData);
+    app.get('/api/data/:id', Data.find);
 
   }
 });

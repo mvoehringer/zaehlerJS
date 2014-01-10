@@ -32,9 +32,12 @@ window.HomeView = Backbone.View.extend({
 				_.each(channels.models, function(model) {
 					// console.log(model.get('name'));
 					var dataList = new DataCollection(Data);
-					dataList.url =  "/data/" +  model.get('_id');
+					dataList.url =  "/api/data/" +  model.get('_id');
+
 					dataList.fetch({
 						success: function (data, response) {
+
+							// add series to highchart
 							function _setSeries(response, data, dataList){
 								var dataArray = [];
 								response.forEach(function(date){
@@ -62,7 +65,7 @@ window.HomeView = Backbone.View.extend({
 									var dateToFetch = new Date(response[0][0]);
 
 									var detailDataList = new DataCollection(Data);
-									detailDataList.url =  "/data/" +  model.get('_id');
+									detailDataList.url =  "/api/data/" +  model.get('_id');
 									var search_params = {
 									  'start': dateToFetch.getTime(),
 									  'end':  dateToFetch.setHours(24)

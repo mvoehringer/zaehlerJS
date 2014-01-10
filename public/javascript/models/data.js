@@ -1,6 +1,6 @@
 window.Data = Backbone.Model.extend({
 
-    urlRoot: "/data",
+    urlRoot: "/api/data",
 
     idAttribute: "_id",
 
@@ -17,5 +17,5 @@ window.Data = Backbone.Model.extend({
 
 window.DataCollection = Backbone.Collection.extend({
     model: Data,
-    url: "/data/52b8caa4eb30c37c2e9800c6"
+    url: "/api/data/"
 });
