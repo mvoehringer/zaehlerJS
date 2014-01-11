@@ -217,7 +217,7 @@ window.HomeView = Backbone.View.extend({
 
 window.LiveChannelView = Backbone.View.extend({
 	tagName: "div",
-	className: "col-md-3" ,
+	className: "col-md-3 col-sm-6 col-xs-12" ,
 	
 	initialize: function() {
   		this.model.on('change',this.render,this);
