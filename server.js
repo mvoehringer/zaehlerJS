@@ -11,8 +11,8 @@ var Http = require('http'),
     Express =  require('express'),
     Config = require('config'),
     Socketio = require('socket.io'),
-    Channels = require('./routes/channels'),
-    Data = require('./routes/data'),
+    Channels = require('./server/routes/channels'),
+    Data = require('./server/routes/data'),
     Events = require('events'),
     EventEmitter = new Events.EventEmitter();
 
@@ -41,21 +41,22 @@ db.open(function(err, db) {
         collection.ensureIndex("medadata.date",function(data){
             console.log('\u001b[32mindex checked\033[0m');
         });
-        collection.ensureIndex("medadata.channel",function(data){
-
-        });
+        collection.ensureIndex("medadata.channel");
     });
 
-        // Start http server
+    // Start http server
     var server = Http.createServer(app).listen(Config.ZaehlerJS.server.Port, function() {
       console.log('\u001b[32mZählerJS listening on port \u001b[33m%d\033[0m', Config.ZaehlerJS.server.Port);
     });
 
-    // socket.io
+    // websockets with socket.io
     var io = Socketio.listen(server);
+    io.set('log level', 2);
+    io.enable('browser client minification');
+    io.enable('browser client gzip');
+
     io.sockets.on('connection', function (socket) {
       EventEmitter.on('addData', function(data){
-        console.log("send to data-" + data.channel);
         socket.emit('data-' + data.channel , data);
       });
     });

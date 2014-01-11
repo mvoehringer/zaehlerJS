@@ -6,8 +6,8 @@
     "dependencies": {
         "express": "3.x",
         "mongodb": "1.4.x",
-        "node-uuid": "1.4.0",
-        "socket.io": "0.9.16",
+        "node-uuid": "1.4.x",
+        "socket.io": "0.9.x",
         "amdefine": "",
         "async": "",
         "config": "",
@@ -16,13 +16,15 @@
     "devDependencies": {
         "grunt": "~0.4.1",
         "pow-mongodb-fixtures": "",
+        "mocha": "",
+        "chai": "",
         "supertest": ""
     },
     "scripts": {
         "test": "NODE_ENV=test mocha"
     },
     "engines": {
-        "node": "0.8.4",
-        "npm": "1.1.49"
+        "node": "0.8.x",
+        "npm": "1.1.x"
     }
 }
