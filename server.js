@@ -81,10 +81,10 @@ db.open(function(err, db) {
     app.put('/api/channels/:id', Channels.updateChannel);
     app.delete('/api/channels/:id', Channels.deleteChannel);
 
-    app.post('/api/data/:id.json', Data.addData);
-    app.post('/api/data/:id', Data.addData);
-    app.post('/api/data/demo/:id', Data.addDemoData);
-    app.get('/api/data/:id', Data.find);
+    app.post('/api/data/:channelId.json', Data.addData);
+    app.post('/api/data/:channelId', Data.addData);
+    app.post('/api/data/demo/:channelId', Data.addDemoData);
+    app.get('/api/data/:channelId', Data.find);
 
   }
 });

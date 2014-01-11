@@ -31,7 +31,7 @@ define(function(require, exports, module) {
             }
         }
 
-        var channelId = req.params.id,
+        var channelId = req.params.channelId,
             // TODO: Set default fo date
             start     = _createDate(req.query['start']),
             end       = _createDate(req.query['end']),
@@ -148,7 +148,7 @@ define(function(require, exports, module) {
         var value  = (typeof req.body["value"] === "undefined") ? 1 : req.body["value"];
         var date  = (typeof req.params.date === "undefined") ? new Date() : _createDate(req.params.date);
         var db = req.app.get('db');
-        var channel = req.params.id;
+        var channel = req.params.channelId;
 
         _saveTuple = function(item, callback){
             var db = req.app.get('db');
@@ -177,7 +177,6 @@ define(function(require, exports, module) {
                 } else {
                     res.send(200, "true");
                 } 
-            
             });
         }else{
             // Use offical zaehlerjs API
@@ -209,7 +208,7 @@ define(function(require, exports, module) {
             function () { return actualDate <= endDate; },
             function (callback) {
                 _addData(req.app.get('db'), 
-                    req.params.id, 
+                    req.params.channelId, 
                     Math.floor(Math.random() * 16) + 1  , 
                     actualDate,function(){
                         actualDate.setMinutes(actualDate.getMinutes() + 1); // + 1 minute
