@@ -43,7 +43,7 @@ var AppRouter = Backbone.Router.extend({
     }
 });
 
-utils.loadTemplate(['HomeView', 'ChannelView', 'ChannelListItemView', 'AboutView'], function() {
+utils.loadTemplate(['HomeView', 'ChannelView', 'ChannelListItemView', 'AboutView', 'LiveChannelView'], function() {
     app = new AppRouter();
     Backbone.history.start();
 });

@@ -40,7 +40,8 @@ window.Channel = Backbone.Model.extend({
     defaults: {
         _id: null,
         name: "",
-        description: ""
+        description: "",
+        value: "-"
     }
 });
 
