@@ -27,16 +27,25 @@ window.utils = {
         this.showAlert('Warning!', 'Fix validation errors and try again', 'alert-warning');
     },
 
+    hideFormElement: function(field){
+        var controlGroup = $('#' + field).parent().parent();
+        controlGroup.hide();
+    },
+    showFormElement: function(field){
+        var controlGroup = $('#' + field).parent().parent();
+        controlGroup.show();
+    },
+
     addValidationError: function (field, message) {
         var controlGroup = $('#' + field).parent().parent();
-        controlGroup.addClass('error');
-        $('.help-inline', controlGroup).html(message);
+        controlGroup.addClass('has-error');
+        $('.error-block', controlGroup).html(message);
     },
 
     removeValidationError: function (field) {
         var controlGroup = $('#' + field).parent().parent();
-        controlGroup.removeClass('error');
-        $('.help-inline', controlGroup).html('');
+        controlGroup.removeClass('has-error');
+        $('.error-block', controlGroup).html('');
     },
 
     showAlert: function(title, text, klass) {

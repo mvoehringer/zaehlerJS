@@ -10,10 +10,6 @@ window.Channel = Backbone.Model.extend({
         this.validators.name = function (value) {
             return value.length > 0 ? {isValid: true} : {isValid: false, message: "You must enter a name"};
         };
-
-        this.validators.description = function (value) {
-            return value.length > 0 ? {isValid: true} : {isValid: false, message: "You must enter a description"};
-        };
     },
 
     validateItem: function (key) {

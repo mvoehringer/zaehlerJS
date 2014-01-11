@@ -11,6 +11,7 @@ window.ChannelView = Backbone.View.extend({
 
     events: {
         "change"        : "change",
+        "change #kind"  : "changeKind",
         "click .save"   : "beforeSave",
         "click .delete" : "deleteChannel",
         "drop #picture" : "dropHandler"
@@ -33,6 +34,15 @@ window.ChannelView = Backbone.View.extend({
         } else {
             utils.removeValidationError(target.id);
         }
+    },
+
+    changeKind: function(event){
+        var target = event.target;
+        if($( "option:selected", target).val() == "impulse"){
+            utils.showFormElement('resolution');
+        }else{
+            utils.hideFormElement('resolution');
+        };
     },
 
     beforeSave: function () {
