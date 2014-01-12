@@ -1,0 +1,43 @@
+{
+	"mainnav": {
+		"about": "About",
+		"channels": "Channels",
+		"list": "List",
+		"addNew": "Add new",
+		"toggle": "toggle navigation"
+	},
+	"home":{
+		"buttonNow" : "Now",
+		"buttonWeek" : "Week",
+		"buttonMonth" : "Month",
+		"buttonYear" : "Year",
+		"buttonAll" : "All"
+	},
+  	"channels": {
+		"details" :{
+			"channelDetails": "Channel",
+			"id": "Id",
+			"name": "Name",
+			"description": "Description",
+			"kind": "Kind of sensor",
+			"kindImpulse": "Impulse", 
+			"kindAbsolute": "Absolute", 	
+			"kindHint": "Use 'imulse' for sensors that send impulses(S0) and 'absolute' for sensors that send the absolut value (for example: tempature)",
+			"resolution": "Resolution",
+			"resolutionHint": "Count how many pulses for on unit. (example: 100 for meters with an resolution of 10000 per kWh)",
+			"unit": "Unit",
+			"unitPower": "Power (W)",
+			"unitEnergy": "Energy (Wh)",
+			"unitVolume": "Volume in cubic metre (m³)",
+			"unitTemperature": "Temperature (℃)",
+			"savedSuccess": "Channel saved successfully.",
+			"savedError": "An error occurred while trying to save this item"
+		}
+	},
+	"global": {
+		"save": "Save",
+		"delete": "Delete",
+		"success": "Success!",
+		"error": "Error"
+	}
+}

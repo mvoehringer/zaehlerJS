@@ -1,0 +1,43 @@
+{
+	"mainnav": {
+		"about": "Über",
+		"channels": "Kanäle",
+		"list": "Liste",
+		"addNew": "Neuen hinzufügen",
+		"toggle": "Navigation umschalten"
+	},
+	"home":{
+		"buttonNow" : "Jetzt",
+		"buttonWeek" : "Wocke",
+		"buttonMonth" : "Monat",
+		"buttonYear" : "Jahr",
+		"buttonAll" : "Alle"
+	},
+	"channels": {
+		"details" :{
+			"channelDetails": "Kanal",
+			"id": "Id",
+			"name": "Name",
+			"description": "Beschreibung",
+			"kind": "Sensortype",
+			"kindImpulse": "Impulse", 
+			"kindAbsolute": "Absolute", 	
+			"kindHint": "Wählen sie 'Impulse' für sensoren die Impulse senden (S0) und 'absolute' für Sensoren welche endgültige Werte senden (zB. Temperatur Sensoren) ",
+			"resolution": "Auflösung",
+			"resolutionHint": "Wie viele Impulse ergeben eine Maßeinheit (zB. 100 für Stromzahler mit einer Auflösung von 10000 Pulsen pro kWh)",
+			"unit": "Maßeinheit",
+			"unitPower": "Leistung in Watt (W)",
+			"unitEnergy": "Energie in Wattstunden (Wh)",
+			"unitVolume": "Volumen in Kubikmeter (m³)",
+			"unitTemperature": "Temperatur in Grad Celsius (℃)",
+			"savedSuccess": "Der Kanal wurde erfolgreich gespeichert.",
+			"savedError": "Ein Fehler ist wärend des speicherns aufgetreten."
+		}
+	},
+	"global": {
+		"save": "Speichern",
+		"delete": "Löschen",
+		"success": "Super!",
+		"error": "Fehler"
+	}
+}

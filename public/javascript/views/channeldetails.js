@@ -1,11 +1,11 @@
 window.ChannelView = Backbone.View.extend({
 
     initialize: function () {
-        this.render();
+        this.render();       
     },
 
     render: function () {
-        $(this.el).html(this.template(this.model.toJSON()));
+        $(this.el).html(this.template(this.model.toJSON())).i18n();
         return this;
     },
 
@@ -64,10 +64,10 @@ window.ChannelView = Backbone.View.extend({
             success: function (model) {
                 self.render();
                 app.navigate('channels/' + model.id, false);
-                utils.showAlert('Success!', 'Channel saved successfully', 'alert-success');
+                utils.showAlert($.t("global.success"), $.t("channels.details.savedSuccess"), 'alert-success');
             },
             error: function () {
-                utils.showAlert('Error', 'An error occurred while trying to save this item', 'alert-error');
+                utils.showAlert($.t("global.error"), $.t("channels.details.savedError"), 'alert-error');
             }
         });
     },
