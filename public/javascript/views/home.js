@@ -1,9 +1,21 @@
 
 
-
+Date.prototype.subtractHour= function(hour){
+    this.setHours(this.getHours()-hour);
+    return this;
+}
+Date.prototype.subtractDay= function(days){
+    this.subtractHour(days * 24);
+    return this;
+}
+Date.prototype.subtractWeek= function(week){
+    this.subtractDay(week * 7);
+    return this;
+}
 
 window.HomeView = Backbone.View.extend({
-
+    chart : "",
+    
     initialize:function () {
     	var that = this;
 		channelsList = new ChannelCollection(Channel);	
@@ -12,8 +24,6 @@ window.HomeView = Backbone.View.extend({
 				that.channels = channels;
 				that.chartOptions = that.getChartOptions();
 				that.render();
-				
-
 			},
 			error: function() {
 				console.log('Failed to fetch!');
@@ -21,6 +31,47 @@ window.HomeView = Backbone.View.extend({
 		});
 
 	},
+	events: {
+        "click .scale-chart"   : "scaleChart",
+        "click .delete" : "deleteChannel",
+    },
+
+    scaleChart: function(event){
+    	var target = event.target;
+    	var now = new Date();
+    	var nowTimestamp = new Date().getTime();
+    	var startTimestamp = new Date().getTime();
+
+    	switch($(target).attr('id')){
+    		case "chart-now":
+				startTimestamp = now.subtractHour(1).getTime();
+			 	break;
+			case "chart-day":
+				startTimestamp = now.subtractDay(1).getTime();
+				break;
+			case "chart-week":
+				startTimestamp = now.subtractWeek(1).getTime();
+				break;
+			case "chart-month":
+				startTimestamp = now.subtractWeek(4).getTime();
+				break;
+			case "chart-year":
+				startTimestamp = now.subtractWeek(52).getTime();
+				break;
+			default:
+				// find oldest item 
+				_.each(this.chart.series, function(serie){
+					var min = _.min(serie.data, function(item){
+							return item['x'];
+					});
+					if(min['x'] < startTimestamp){
+						startTimestamp = min['x'];
+					}
+				})
+    	}
+    	this.chart.xAxis[0].setExtremes(startTimestamp, nowTimestamp);
+    },
+
 
 	render: function(){
 		var that = this;
@@ -33,11 +84,11 @@ window.HomeView = Backbone.View.extend({
     		that.renderChart();
     		that.renderLiveChannels();
    		}).defer();
-    },
+    }, 
 
     renderChart:function () {
     	var that = this;
-    	var chart;
+
 
         this.chart = new Highcharts.Chart(this.chartOptions);
 		Highcharts.setOptions({  

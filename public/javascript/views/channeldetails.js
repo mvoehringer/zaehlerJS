@@ -48,7 +48,6 @@ window.ChannelView = Backbone.View.extend({
     beforeSave: function () {
         var self = this;
         var check = this.model.validateAll();
-        console.log("beforeSave");
         if (check.isValid === false) {
             utils.displayValidationErrors(check.messages);
             return false;
@@ -59,7 +58,6 @@ window.ChannelView = Backbone.View.extend({
 
     saveChannel: function () {
         var self = this;
-        console.log('before save');
         this.model.save(null, {
             success: function (model) {
                 self.render();

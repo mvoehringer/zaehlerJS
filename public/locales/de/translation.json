@@ -8,6 +8,7 @@
 	},
 	"home":{
 		"buttonNow" : "Jetzt",
+		"buttonDay" : "Tag",
 		"buttonWeek" : "Wocke",
 		"buttonMonth" : "Monat",
 		"buttonYear" : "Jahr",

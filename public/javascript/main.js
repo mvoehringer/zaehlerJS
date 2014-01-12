@@ -48,12 +48,9 @@ var AppRouter = Backbone.Router.extend({
     }
 });
 
-i18n.init({fallbackLng: false, debug: true},function() {
+i18n.init({fallbackLng: false},function() {
   // translate nav
   $(".nav").i18n();
-
-  // programatical access
-  // var appName = t("app.name");
 });
 
 
