@@ -154,6 +154,12 @@ define(function(require, exports, module) {
             var db = req.app.get('db');
             var value = item[1];
             var date = _createDate(Math.round(item[0]));
+            
+            req.app.get('EventEmitter').emit('addData', {
+                channel : channel, 
+                value: value, 
+                date: date
+            });
 
             _addData(db, 
                     channel, 

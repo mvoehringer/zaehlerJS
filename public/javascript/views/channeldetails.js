@@ -46,7 +46,6 @@ window.ChannelView = Backbone.View.extend({
     },
 
     beforeSave: function () {
-        var self = this;
         var check = this.model.validateAll();
         if (check.isValid === false) {
             utils.displayValidationErrors(check.messages);
