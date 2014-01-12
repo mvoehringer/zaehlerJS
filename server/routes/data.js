@@ -20,13 +20,13 @@ define(function(require, exports, module) {
     @param end enddate for filter
     */
     exports.find = function(req, res) {
-        _pushValueToArray = function (date, item, itemsArray, minDate, maxDate){
+        _pushValueToArray = function (date, item, itemsArray, minDate, maxDate, channel){
             // ignore values out of timeslice
             if(date < maxDate || date >= minDate ){
                 // ignore empty values
                 if(item && item.value){
-                    // TODO scale value based on item.count
-                    itemsArray.push( [date.toJSON(), item.value]);
+                    // scale value based on item.count
+                    itemsArray.push( [date.toJSON(), this._scaleValue(item.value, item.count, channel)]);
                 }
             }
         }
@@ -70,52 +70,70 @@ define(function(require, exports, module) {
             }
         }
         
-        db.collection('data', function(err, collection) {
-            var itemsArray = [];
-            // console.log(JSON.stringify(filter));
-            var cursor = collection.find(filter, aggregationFields).sort( { 'metadata.date': 1 } );
+        // get Channel
+        req.app.get('db').collection('channels', function(err, collection) {
+            collection.findOne({'_id':channelId}, function(err, channel) {
+                
+                // get data for channel               
+                db.collection('data', function(err, collection) {
+                    var itemsArray = [];
+                    // console.log(JSON.stringify(filter));
+                    var cursor = collection.find(filter, aggregationFields).sort( {'metadata.date': 1} );
 
-            cursor.each(function(err, item) {
-                // If the item is null then the cursor is exhausted/empty and closed
-                if(item == null) {
-                    res.send(itemsArray);
-                }else{
-                    switch(getDataFrom){
-                        case 'hour':
-                            Object.keys(item['hourly']).forEach(function(hour){
-                                var date = new Date(item['metadata']['date']);
-                                date.setUTCHours(hour);
-                                var value = item['hourly'][hour];
-                                _pushValueToArray(date, value, itemsArray, start, end);
-                            });
-                            break;
-                        case 'minute': 
-      
-                            Object.keys(item['minute']).forEach(function(hour){
-                                // console.log(item['minute'][hour]);
-                                Object.keys(item['minute'][hour]).forEach(function(minute) {
-                                    var date = new Date(item['metadata']['date']);
-                                    date.setUTCHours(hour);
-                                    date.setUTCMinutes(minute);
+                    cursor.each(function(err, item) {
+                        // If the item is null then the cursor is exhausted/empty and closed
+                        if(item == null) {
+                            res.send(itemsArray);
+                        }else{
+                            switch(getDataFrom){
+                                case 'hour':
+                                    Object.keys(item['hourly']).forEach(function(hour){
+                                        var date = new Date(item['metadata']['date']);
+                                        date.setUTCHours(hour);
+                                        var dataItem = item['hourly'][hour];
+                                        
+                                        _pushValueToArray(date, dataItem, itemsArray, start, end, channel);
+                                    });
+                                    break;
+                                case 'minute':
+                                    Object.keys(item['minute']).forEach(function(hour){
+                                        // console.log(item['minute'][hour]);
+                                        Object.keys(item['minute'][hour]).forEach(function(minute) {
+                                            var date = new Date(item['metadata']['date']);
+                                            date.setUTCHours(hour);
+                                            date.setUTCMinutes(minute);
 
-                                    var value = item['minute'][hour][minute];
-                                    // console.log(value);
-                                    _pushValueToArray(date, value, itemsArray, start, end);
-                                })
-                            });
-                            break;
-                        case 'day':
-                        default:
-                            // Default is Day
-                            _pushValueToArray(item['metadata']['date'], item['day'], itemsArray, start, end);
-                    }
-                }
+                                            var dataItem = item['minute'][hour][minute];
+                                            // console.log(value);
+                                            _pushValueToArray(date, dataItem, itemsArray, start, end, channel);
+                                        })
+                                    });
+                                    break;
+                                case 'day':
+                                default:
+                                    // Default is Day
+                                     _pushValueToArray(item['metadata']['date'], item['day'], itemsArray, start, end, channel);
+                            }
+                        }
+                    });
+                });
+
             });
         });
+
+
     };
 
-    _createDate = function(string){
+    _scaleValue = function(value, count, channel){
+        if(channel.kind === "absolute"){
+            value =  value / count;
+        }else if(channel.resolution > 0){
+            value = value / channel.resolution;
+        }
+        return value;
+    },
 
+    _createDate = function(string){
         var date = new Date(string);
         if ( Object.prototype.toString.call(date) === "[object Date]" ) {
             if ( isNaN( date.getTime() ) ) {  // d.valueOf() could also work

@@ -29,13 +29,26 @@ window.HomeView = Backbone.View.extend({
 				console.log('Failed to fetch!');
 			}
 		});
-
 	},
+	
 	events: {
         "click .scale-chart"   : "scaleChart",
         "click .delete" : "deleteChannel",
     },
 
+	render: function(){
+		var that = this;
+		$(this.el)
+			.html(this.template())
+			.i18n(); // translate 
+    	
+    	// wait, till view is load
+    	_(function() {
+    		that.renderChart();
+    		that.renderLiveChannels();
+   		}).defer();
+    },
+ 
     scaleChart: function(event){
     	var target = event.target;
     	var now = new Date();
@@ -72,23 +85,8 @@ window.HomeView = Backbone.View.extend({
     	this.chart.xAxis[0].setExtremes(startTimestamp, nowTimestamp);
     },
 
-
-	render: function(){
-		var that = this;
-		$(this.el)
-			.html(this.template())
-			.i18n(); // translate 
-    	
-    	// wait, till view is load
-    	_(function() {
-    		that.renderChart();
-    		that.renderLiveChannels();
-   		}).defer();
-    }, 
-
     renderChart:function () {
     	var that = this;
-
 
         this.chart = new Highcharts.Chart(this.chartOptions);
 		Highcharts.setOptions({  
@@ -277,8 +275,41 @@ window.LiveChannelView = Backbone.View.extend({
 	},
 
     render: function () {
-    	$(this.el).html(this.template(this.model.toJSON()));
+    	$(this.el).html(this.template({
+    			model: this.model.toJSON(),
+    			view: this
+    		}));
         return this;
+    },
+    formatData: function(data){
+    	if(_.isNumber(data.value)){
+	    	return this.twoDecimals(data.value) + " " + this.unitForValue(data.unit);
+    	}else{
+    		return "-";
+    	}
+    },
+	
+	unitForValue: function(unit){
+		switch(unit){
+			case "temperature":
+				return "℃";
+				break;
+			case "power":
+				return "W";
+				break;
+			case "energy":
+				return "Wh";
+				break;
+			case "volume":
+				return "m³"
+				break;
+		}
+		console.log(unit);
+		return "";
+	},
+
+	twoDecimals: function(data){
+    	return Number(data).toFixed(2).toLocaleString();
     }
 
 });

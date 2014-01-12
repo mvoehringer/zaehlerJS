@@ -1,9 +1,9 @@
 <div class="liveCannel">
 	<div class="panel panel-default">
-		<div class="panel-heading"><%= name %></div>
+		<div class="panel-heading"><%- model.name %></div>
 		<div class="panel-body">
-			<h2 class="text-center"><%= value %></h2>
+			<h2 class="text-center"><%- view.formatData(model) %></h2>
 		</div>
-		<div class="panel-footer hidden-xs"><small class="text-muted"><%- description %></small></div>
+		<div class="panel-footer hidden-xs"><small class="text-muted"><%- model.description %></small></div>
 	</div>
 </div>
