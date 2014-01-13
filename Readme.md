@@ -96,6 +96,6 @@ or
 
 ## TODOs
  * GIPO Ports direkt auslesen
- * Websockets zum Realtime anzeigen 
  * Tests für alles
+ * Als Zähler anzeigen
  * Grafen mit Zomm-In/Zoom-Out 

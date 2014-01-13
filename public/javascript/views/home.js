@@ -13,6 +13,7 @@ Date.prototype.subtractWeek= function(week){
     return this;
 }
 
+
 window.HomeView = Backbone.View.extend({
     chart : "",
     
@@ -82,7 +83,7 @@ window.HomeView = Backbone.View.extend({
 					}
 				})
     	}
-    	this.chart.xAxis[0].setExtremes(startTimestamp, nowTimestamp);
+    	this.chart.xAxis[0].setExtremes(startTimestamp, nowTimestamp + 30000);
     },
 
     renderChart:function () {
@@ -163,7 +164,7 @@ window.HomeView = Backbone.View.extend({
 			chart: {
 				renderTo: 'chart',
 				type: 'line',
-				animation: false,
+				// animation: false,
 				zoomType: 'x'
 			},
 			credits:{
@@ -186,7 +187,7 @@ window.HomeView = Backbone.View.extend({
 			},
 			xAxis: {        
 				type: 'datetime',
-				minRange: 3600 * 1000, // one hour
+				minRange: 100 * 1000, // one hour
 				labels: {
 					dateTimeLabelFormats: {
 						minute: '%H:%M',
@@ -257,7 +258,15 @@ window.HomeView = Backbone.View.extend({
 			var socket = io.connect();
 			// Listen to new data on websocket
 			socket.on('data-' + channel.get('_id'), function(data) {
-				that.channels.get(channel.get('_id')).set({value: data.value });  
+
+				// set new data to channel object
+				that.channels.get(channel.get('_id')).set({value: data.value });
+
+				_.each(that.chart.series, function(serie){
+					if(serie.options.channelId == channel.get('_id')){
+						serie.addPoint([Date.parse(data.date), data.value], true, false);
+					}
+				})			
 			});
 
         });
