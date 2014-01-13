@@ -22,12 +22,14 @@ define(function(require, exports, module) {
     exports.find = function(req, res) {
         _pushValueToArray = function (date, item, itemsArray, minDate, maxDate, channel){
             // ignore values out of timeslice
-            if(date < maxDate || date >= minDate ){
-                // ignore empty values
-                if(item && item.value){
-                    // scale value based on item.count
-                    itemsArray.push( [date.toJSON(), this._scaleValue(item.value, item.count, channel)]);
-                }
+            if( date >= minDate  || minDate == null){
+                if (date < maxDate|| maxDate == null ) {
+                    // ignore empty values
+                    if(item && item.count){
+                        // scale value based on item.count
+                        itemsArray.push( [date.toJSON(), this._scaleValue(item.value, item.count, channel)]);
+                    }
+                };
             }
         }
 
@@ -45,7 +47,7 @@ define(function(require, exports, module) {
             getDataFrom = 'day';
 
         if (start && end) {
-            
+
             var filterStart = new Date(start.getTime()),
                 filterEnd = new Date(end.getTime());
             // fetch minimum of one day if start 
@@ -54,17 +56,18 @@ define(function(require, exports, module) {
                 fiterEnd = new Date(filterStart.getTime());
                 fiterEnd.addHours(24);
             }
+           
             filter["$and"].push(
                     { 'metadata.date': { $gte: filterStart} }, 
                     { 'metadata.date': { $lt: filterEnd}}
                 );
 
             if(end - start <= limit * 60 * 1000 ){
-                // on item per miunte
+                // one item per miunte
                 getDataFrom = 'minute';
                 aggregationFields = {day:false, hourly:false};
             }else if(end - start <= limit * 60 * 60 * 1000 ){
-                // on item per houre
+                // one item per houre
                 getDataFrom = 'hour';
                 aggregationFields = {minute:false, day:false};
             }
@@ -97,14 +100,12 @@ define(function(require, exports, module) {
                                     break;
                                 case 'minute':
                                     Object.keys(item['minute']).forEach(function(hour){
-                                        // console.log(item['minute'][hour]);
                                         Object.keys(item['minute'][hour]).forEach(function(minute) {
                                             var date = new Date(item['metadata']['date']);
                                             date.setUTCHours(hour);
                                             date.setUTCMinutes(minute);
 
                                             var dataItem = item['minute'][hour][minute];
-                                            // console.log(value);
                                             _pushValueToArray(date, dataItem, itemsArray, start, end, channel);
                                         })
                                     });
