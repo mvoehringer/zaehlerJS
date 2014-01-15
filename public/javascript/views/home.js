@@ -173,7 +173,7 @@ window.HomeView = Backbone.View.extend({
 			plotOptions: {
 				line: {
 					lineWidth: '1px',
-					animation: false,
+					animation: true,
 					marker: {
 						enabled: false
 					}
@@ -212,7 +212,7 @@ window.HomeView = Backbone.View.extend({
 					    }
 
 						// console.log("afterSetExtremes");
-						chart.showLoading('Loading data from server...');
+						chart.showLoading('Loading ...');
 
 						chart.series.forEach(function(serie){
 							$.getJSON(serie.options.channelUrl, {
@@ -276,8 +276,8 @@ window.HomeView = Backbone.View.extend({
 
 
 window.LiveChannelView = Backbone.View.extend({
-	tagName: "div",
-	className: "col-md-2 col-sm-3 col-xs-6" ,
+	tagName: "span",
+	className: "" ,
 	
 	initialize: function() {
   		this.model.on('change',this.render,this);
