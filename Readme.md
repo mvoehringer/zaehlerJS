@@ -1,5 +1,7 @@
 Attention: ZählerJs is in alpha stage and not ready for production.
 
+![example](https://raw.github.com/mvoehringer/zaehlerJS/master/doc/img/startscreen.png)
+
 ## Install on raspberryPI
 ### Install NodeJs
   * sudo aptitude install nodejs npm
