@@ -1,4 +1,4 @@
-Attention: ZählerJs is in alpha stage and not ready for production.
+**ZählerJs is in alpha state and not ready for production.**
 
 ![example](https://raw.github.com/mvoehringer/zaehlerJS/master/doc/img/startscreen.png)
 
@@ -54,6 +54,6 @@ mocha
 
 
 ## TODOs
- * Tests für alles
- * Als Zähler anzeigen
- * Grafen mit Zomm-In/Zoom-Out 
+- [ ] add unit test for all 
+- [ ] styling: show results as meter and counter
+- [ ] Zoom-In/Zoom-Out  
