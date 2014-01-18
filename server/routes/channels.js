@@ -8,6 +8,10 @@ define(function(require, exports, module) {
   exports.findAll = function(req, res) {
     req.app.get('db').collection('channels', function(err, collection) {
         collection.find().sort({ name: 1 }).toArray(function(err, items) {
+            if(err){
+                console.error(JSON.stringify(err));
+                res.send({'error': err}, 500);
+            }
             res.send(items);
         });
     });
@@ -15,25 +19,34 @@ define(function(require, exports, module) {
      
   exports.findById = function(req, res) {
       var id = req.params.id;
-      console.log('Retrieving channels: ' + id);
+      // console.log('Retrieving channel: %s', id);
       req.app.get('db').collection('channels', function(err, collection) {
           collection.findOne({'_id':id}, function(err, item) {
+              if(err){
+                console.error(JSON.stringify(err));
+                res.send({'error': err}, 500);
+              }
+              if(!item){
+                res.send({'error': 'channel not available'}, 404);
+              }
               res.send(item);
           });
       });
+     
   };
 
   exports.addChannel = function(req, res) {
       var channel = req.body;
       channel['_id']= uuid.v4();
 
-      console.log('Adding channel ' + JSON.stringify(channel));
+      // console.log('Adding channel ' + JSON.stringify(channel));
       req.app.get('db').collection('channels', function(err, collection) {
           collection.insert(channel, {safe:true}, function(err, result) {
               if (err) {
-                  res.send({'error':'An error has occurred'});
+                  console.error('Error add channel: %s',err);
+                  res.send({'error':'An error has occurred'}, 500);
               } else {
-                  console.log('Success: ' + JSON.stringify(result[0]));
+                  // console.log('Success: ' + JSON.stringify(result[0]));
                   res.send(result[0]);
               }
           });
@@ -43,16 +56,16 @@ define(function(require, exports, module) {
       var id = req.params.id;
       var channel = req.body;
       delete channel._id;
-      console.log('Updating channel: ' + id);
-      console.log(JSON.stringify(channel));
 
       req.app.get('db').collection('channels', function(err, collection) {
           collection.update({'_id':id}, channel, {safe:true}, function(err, result) {
               if (err) {
-                  console.log('Error updating channel: ' + err);
-                  res.send({'error':'An error has occurred'});
+                  console.error('Error updating channel: %s', err);
+                  res.send({'error':'An error has occurred'}, 500);
               } else {
-                  console.log('' + result + ' document(s) updated');
+                  // console.log('' + result + ' document(s) updated');
+                  // console.log(JSON.stringify(req.body));
+                  channel._id = id;
                   res.send(channel);
               }
           });
@@ -61,16 +74,16 @@ define(function(require, exports, module) {
 
   exports.deleteChannel = function(req, res) {
       var id = req.params.id;
-      console.log('Deleting channel ' + id);
+      // console.log('Deleting channel ' + id);
       req.app.get('db').collection('channels', function(err, collection) {
           collection.remove({'_id':id}, {safe:true}, function(err, result) {
               if (err) {
                   res.send({'error':'An error has occurred - ' + err});
-              } else {
-                  console.log('' + result + ' document(s) deleted');
-                  // TODO remove all data of this channes
-                  res.send(req.body);
               }
+              if(!result){
+                res.send({'error': 'channel not found'}, 404);
+              } 
+              res.send(req.body);
           });
       });
   }
