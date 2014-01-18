@@ -1,3 +1,4 @@
 ZaehlerJS:
   server:
     Port: 80
+    LogLevel: default    

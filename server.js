@@ -32,9 +32,11 @@ var db = new Mongo.Db(Config.ZaehlerJS.db.Name,
 
 db.open(function(err, db) {
   if (err) {
-    return console.log('\u001b[31mFailed to connect to MongoDB: ' + err + '\033[0m');
+    return console.log('\u001b[31mFailed to connect to MongoDB  ' + err + '\033[0m');
   } else {
-    console.log('\u001b[32mConnect to MongoDB\033[0m');
+    console.log('\u001b[32mConnect to MongoDB\u001b[33m %s:%d/%s\033[0m',Config.ZaehlerJS.db.Host,
+                                                                        Config.ZaehlerJS.db.Port,
+                                                                        Config.ZaehlerJS.db.Name);
 
     // Create index
     db.collection('data', function(err, collection) {
@@ -66,7 +68,11 @@ db.open(function(err, db) {
       app.set('config', Config.ZaehlerJS);
       app.set('db', db);
       app.set('EventEmitter', EventEmitter);
-      app.use(Express.logger('dev'));                         /* 'default', 'short', 'tiny', 'dev' */
+
+      if(Config.ZaehlerJS.server.LogLevel){
+        //http://www.senchalabs.org/connect/logger.html
+        app.use(Express.logger(Config.ZaehlerJS.server.LogLevel));                        
+      }  
       app.use(Express.urlencoded());
       app.use(Express.json({limit: '10mb'}));
       app.use(Express.urlencoded({limit: '10mb'}));

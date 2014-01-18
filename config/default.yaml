@@ -1,6 +1,8 @@
 ZaehlerJS:
   server:
     Port: 3000
+    # 'default', 'short', 'tiny', 'dev' or empty for no logging
+    LogLevel: dev    
   db:
     Host: localhost
     Port: 27017

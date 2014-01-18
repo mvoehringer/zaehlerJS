@@ -1,3 +1,6 @@
 ZaehlerJS:
+  server:
+    Port: 3001
+    LogLevel: 
   db:
     Name: zaehlerjs_test
