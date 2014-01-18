@@ -1,5 +1,6 @@
 **ZählerJs is in alpha state and not ready for production.**
 
+
 ![example](https://raw.github.com/mvoehringer/zaehlerJS/master/doc/img/startscreen.png)
 
 ## Install on raspberryPI
@@ -56,4 +57,6 @@ mocha
 ## TODOs
 - [ ] add unit test for all 
 - [ ] styling: show results as meter and counter
-- [ ] Zoom-In/Zoom-Out  
+- [ ] Zoom-In/Zoom-Out 
+
+[![Build Status](https://travis-ci.org/mvoehringer/zaehlerJS.png?branch=master)](https://travis-ci.org/mvoehringer/zaehlerJS)

@@ -16,6 +16,9 @@ var Http = require('http'),
     Events = require('events'),
     EventEmitter = new Events.EventEmitter();
 
+// export event emiiter for test runner
+exports.EventEmitter = EventEmitter;
+
 
 // Initiate express
 var app = Express();
@@ -49,6 +52,9 @@ db.open(function(err, db) {
     // Start http server
     var server = Http.createServer(app).listen(Config.ZaehlerJS.server.Port, function() {
       console.log('\u001b[32mZählerJS listening on port \u001b[33m%d\033[0m', Config.ZaehlerJS.server.Port);
+
+      // server is ready, tell test runner to start testing
+      EventEmitter.emit('serverReady');
     });
 
     // websockets with socket.io

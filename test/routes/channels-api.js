@@ -1,6 +1,5 @@
 var server = require('../../server');
 var should = require('should');
-var assert = require('assert');
 var request = require('supertest'); 
 var config = require("config");
 var fixtures = require('pow-mongodb-fixtures').connect(config.ZaehlerJS.db.Name, {
@@ -141,6 +140,7 @@ describe('Channels API', function() {
 				done();
 			});
 	});
+
 	it('DELETE /api/channels/7a3db63e-9ae0-4090-b736-d0dbbb389e10 should delete the channels',function(done){
 		request(url)
 			.del('/api/channels/7a3db63e-9ae0-4090-b736-d0dbbb389e10')

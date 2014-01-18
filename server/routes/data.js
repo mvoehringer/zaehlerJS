@@ -76,7 +76,13 @@ define(function(require, exports, module) {
         // get Channel
         req.app.get('db').collection('channels', function(err, collection) {
             collection.findOne({'_id':channelId}, function(err, channel) {
-                
+                if(err){
+                    res.json({'error': err}, 500);
+                }
+                if(!channel){
+                    res.json({'error': 'channel not found'}, 404);
+                }
+
                 // get data for channel               
                 db.collection('data', function(err, collection) {
                     var itemsArray = [];
@@ -86,7 +92,7 @@ define(function(require, exports, module) {
                     cursor.each(function(err, item) {
                         // If the item is null then the cursor is exhausted/empty and closed
                         if(item == null) {
-                            res.send(itemsArray);
+                            res.json(itemsArray);
                         }else{
                             switch(getDataFrom){
                                 case 'hour':
@@ -122,8 +128,6 @@ define(function(require, exports, module) {
 
             });
         });
-
-
     };
 
     _scaleValue = function(value, count, channel){
@@ -166,10 +170,14 @@ define(function(require, exports, module) {
 
     exports.addData = function(req, res) {
         var value  = (typeof req.body["value"] === "undefined") ? 1 : req.body["value"];
-        var date  = (typeof req.params.date === "undefined") ? new Date() : _createDate(req.params.date);
+        var date  = (typeof req.body["date"] === "undefined") ? new Date() : _createDate(req.body["date"]);
         var db = req.app.get('db');
         var channel = req.params.channelId;
 
+        if( req.body["date"] && date === null){
+            console.error('wrong timestamp %s', req.body["date"]);
+            res.json({error: 'wrong timestamp'}, 500);
+        }
         _saveTuple = function(item, callback){
             var db = req.app.get('db');
             var value = item[1];
@@ -199,9 +207,9 @@ define(function(require, exports, module) {
             async.each(req.body, _saveTuple, function(err){
                 if (err) {
                     console.error(err);
-                    res.send(500, err);
+                    res.json(err, 500);
                 } else {
-                    res.send(200, "true");
+                    res.json("true", 200);
                 } 
             });
         }else{
@@ -217,9 +225,9 @@ define(function(require, exports, module) {
                     date, function(err, result){
                 if (err) {
                     console.error(err);
-                    res.send(500, err);
+                    res.json(err, 500);
                 } else {
-                    res.send(200, "true");
+                    res.json("true", 200);
                 }            
             });
         }
@@ -242,7 +250,7 @@ define(function(require, exports, module) {
                     });
             },
             function (err) {
-                res.send(true);
+                res.json(true);
             }
         );      
     }
