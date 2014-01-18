@@ -10,6 +10,12 @@ window.Channel = Backbone.Model.extend({
         this.validators.name = function (value) {
             return value.length > 0 ? {isValid: true} : {isValid: false, message: "You must enter a name"};
         };
+        this.validators.kind = function (value) {
+            return value.length > 0 ? {isValid: true} : {isValid: false, message: "You must select the type of sensor"};
+        };
+        this.validators.unit = function (value) {
+            return value.length > 0 ? {isValid: true} : {isValid: false, message: "You must select the unit"};
+        };
     },
 
     validateItem: function (key) {
