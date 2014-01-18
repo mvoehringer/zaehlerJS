@@ -115,6 +115,7 @@ define(function(require, exports, module) {
                                     // Default is Day
                                      _pushValueToArray(item['metadata']['date'], item['day'], itemsArray, start, end, channel);
                             }
+
                         }
                     });
                 });
@@ -249,7 +250,7 @@ define(function(require, exports, module) {
     /*
     merge two object literals, if properties exist in both objects, the data takes precedence.
     */
-    function _mergeConfig(template, data) {
+    _mergeConfig = function(template, data) {
         var obj = {};
 
         for (var x in template)

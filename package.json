@@ -18,6 +18,7 @@
         "pow-mongodb-fixtures": "",
         "mocha": "",
         "chai": "",
+        "should": "",
         "supertest": ""
     },
     "scripts": {

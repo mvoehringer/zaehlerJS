@@ -57,7 +57,7 @@ db.open(function(err, db) {
 
     io.sockets.on('connection', function (socket) {
       EventEmitter.on('addData', function(data){
-        socket.emit('data-' + data.channel , data);
+        socket.volatile.emit('data-' + data.channel , data);
       });
     });
 
@@ -68,7 +68,8 @@ db.open(function(err, db) {
       app.set('EventEmitter', EventEmitter);
       app.use(Express.logger('dev'));                         /* 'default', 'short', 'tiny', 'dev' */
       app.use(Express.urlencoded());
-      app.use(Express.json());
+      app.use(Express.json({limit: '10mb'}));
+      app.use(Express.urlencoded({limit: '10mb'}));
       app.use(Express.compress());                            /* enable gzip compression */
       app.use(Express.static(Path.join(__dirname, 'public'))); /* serve static files */
       app.use(Express.favicon(__dirname + '/public/icon/favicon.ico')); /* add favicon */
