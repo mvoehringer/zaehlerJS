@@ -27,7 +27,7 @@ define(function(require, exports, module) {
                     // ignore empty values
                     if(item && item.count){
                         // scale value based on item.count
-                        itemsArray.push( [date.toJSON(), this._scaleValue(item.value, item.count, channel)]);
+                        itemsArray.push([date.toJSON(), this._scaleValue(item.value, item.count, channel)]);
                     }
                 };
             }
@@ -46,6 +46,9 @@ define(function(require, exports, module) {
             aggregationFields = {minute:false, hourly:false},
             getDataFrom = 'day';
 
+        // console.log(start.getTime());
+        // console.log(end.getTime());
+
         if (start && end) {
 
             var filterStart = new Date(start.getTime()),
@@ -61,7 +64,7 @@ define(function(require, exports, module) {
                     { 'metadata.date': { $gte: filterStart} }, 
                     { 'metadata.date': { $lt: filterEnd}}
                 );
-
+            // console.log(filter);
             if(end - start <= limit * 60 * 1000 ){
                 // one item per miunte
                 getDataFrom = 'minute';
@@ -72,7 +75,7 @@ define(function(require, exports, module) {
                 aggregationFields = {minute:false, day:false};
             }
         }
-        
+        // console.log(getDataFrom);
         // get Channel
         req.app.get('db').collection('channels', function(err, collection) {
             collection.findOne({'_id':channelId}, function(err, channel) {
@@ -99,8 +102,8 @@ define(function(require, exports, module) {
                                     Object.keys(item['hourly']).forEach(function(hour){
                                         var date = new Date(item['metadata']['date']);
                                         date.setUTCHours(hour);
+
                                         var dataItem = item['hourly'][hour];
-                                        
                                         _pushValueToArray(date, dataItem, itemsArray, start, end, channel);
                                     });
                                     break;
@@ -119,7 +122,7 @@ define(function(require, exports, module) {
                                 case 'day':
                                 default:
                                     // Default is Day
-                                     _pushValueToArray(item['metadata']['date'], item['day'], itemsArray, start, end, channel);
+                                    _pushValueToArray(item['metadata']['date'], item['day'], itemsArray, start, end, channel);
                             }
 
                         }

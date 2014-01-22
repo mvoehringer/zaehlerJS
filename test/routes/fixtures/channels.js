@@ -16,5 +16,13 @@ var channels = exports.channels = {
         resolution: '',
         unit: 'temperature',      
         description: 'description channel 2'
+    },
+    channel3: {
+        _id: '00000000-0000-0000-0000-000000000000',
+        name: 'Channel 3',
+        kind: 'absolut',
+        resolution: '',
+        unit: 'temperature',      
+        description: 'description channel 3'
     }
 }
