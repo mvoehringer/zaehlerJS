@@ -1,7 +1,8 @@
-var server = require('../../server');
+var app = require('../../server');
 var should = require('should');
 var request = require('supertest'); 
 var config = require("config");
+var Http = require('http');
 var fixtures = require('pow-mongodb-fixtures').connect(config.ZaehlerJS.db.Name, {
             host: config.ZaehlerJS.db.Host,
             port: config.ZaehlerJS.db.Port 
@@ -18,7 +19,9 @@ describe('Data API', function() {
                 done();
                 return process.exit(-1);
             }
-            done();
+            this.server = Http.createServer(app).listen(3001, function() {
+				done();
+			});
         });
     });
     
@@ -30,7 +33,7 @@ describe('Data API', function() {
 				return process.exit(-1);
 			}
 			fixtures.close(function(){
-				done();
+				this.server.close(done);
 			});
 		});
     });

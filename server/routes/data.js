@@ -239,7 +239,7 @@ define(function(require, exports, module) {
     exports.addDemoData = function(req, res) {
         var endDate = new Date(); // NOW
         var actualDate = new Date();        // Now - 1year
-        actualDate.setYear(endDate.getFullYear() - 3 );
+        actualDate.setYear(endDate.getFullYear() - 1);
 
         async.whilst(
             function () { return actualDate <= endDate; },
@@ -248,7 +248,7 @@ define(function(require, exports, module) {
                     req.params.channelId, 
                     Math.floor(Math.random() * 16) + 1  , 
                     actualDate,function(){
-                        actualDate.setMinutes(actualDate.getMinutes() + 1); // + 1 minute
+                        actualDate.setMinutes(actualDate.getMinutes() + 2); // + 1 minute
                         callback(); 
                     });
             },

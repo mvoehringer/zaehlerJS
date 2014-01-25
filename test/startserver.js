@@ -1,14 +1,22 @@
-var server = require('../server');
+process.env.NODE_ENV = 'test';
+
+var app = require('../server');
 var request = require('supertest');
+var Http = require('http');
+
 
 describe('Start server', function() {
 	var url = 'http://localhost:3001';
+	var server;
 
 	before(function (done) {
-		server.EventEmitter.on('serverReady',function(){
+		this.server = Http.createServer(app).listen(3001, function() {
 			done();
-		})
+		});
     });
+    after(function(done) {
+    	this.server.close(done);
+  	});
     			
 	it('GET / should return 200 ',function(done){
 		request(url)
