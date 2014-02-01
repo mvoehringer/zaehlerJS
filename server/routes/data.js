@@ -6,12 +6,12 @@ var async = require('async');
 Date.prototype.addHours= function(h){
     this.setHours(this.getHours()+h);
     return this;
-}
+};
 
 Date.prototype.addMinutes= function(m){
     this.setMinutes(this.getMinutes()+m);
     return this;
-}
+};
 
 
 define(function(require, exports, module) {
@@ -22,22 +22,22 @@ define(function(require, exports, module) {
     exports.find = function(req, res) {
         _pushValueToArray = function (date, item, itemsArray, minDate, maxDate, channel){
             // ignore values out of timeslice
-            if( date >= minDate  || minDate == null){
-                if (date < maxDate|| maxDate == null ) {
+            if( date >= minDate  || minDate === null){
+                if (date < maxDate|| maxDate === null ) {
                     // ignore empty values
                     if(item && item.count){
                         // scale value based on item.count
                         itemsArray.push([date.toJSON(), this._scaleValue(item.value, item.count, channel)]);
                     }
-                };
+                }
             }
-        }
+        };
 
         var channelId = req.params.channelId,
             // TODO: Set default fo date
             start     = _createDate(req.query['start']),
             end       = _createDate(req.query['end']),
-            limit     = req.query['limit'] ? parseInt(req.query['limit']) : 500,
+            limit     = req.query['limit'] ? parseInt(req.query['limit'], 10) : 500,
             filter    = {  
                         $and: [
                             {'metadata.channel': channelId }
@@ -140,7 +140,7 @@ define(function(require, exports, module) {
             value = value / channel.resolution;
         }
         return value;
-    },
+    };
 
     _createDate = function(string){
         var date = new Date(string);
@@ -159,17 +159,17 @@ define(function(require, exports, module) {
             }
         }
         return null;
-    }
+    };
 
     exports.preAllocateDataDocumentForDay = function(db, date){
         db.collection('channels', function(err, collection) {
             collection.find().each(function(err, item){
-                if(item != null) {
+                if(item !== null) {
                     _preAllocateDataDocument(db, item['_id'], date);
                 }
-            })
+            });
         });
-    }
+    };
 
     exports.addData = function(req, res) {
         var value  = (typeof req.body["value"] === "undefined") ? 1 : parseFloat(req.body["value"]);
@@ -198,7 +198,7 @@ define(function(require, exports, module) {
                     date, function(err, result){
                         callback(err);
             });
-        }
+        };
 
         // fallback for the voelkszaehler.org middleware
         if(typeof req.params.ts !== "undefined"){
@@ -234,7 +234,7 @@ define(function(require, exports, module) {
                 }            
             });
         }
-    }
+    };
 
     exports.addDemoData = function(req, res) {
         var endDate = new Date(); // NOW
@@ -256,28 +256,11 @@ define(function(require, exports, module) {
                 res.json(true);
             }
         );      
-    }
-
-    /*
-    merge two object literals, if properties exist in both objects, the data takes precedence.
-    */
-    _mergeConfig = function(template, data) {
-        var obj = {};
-
-        for (var x in template)
-        if (template.hasOwnProperty(x))
-        obj[x] = template[x];
-
-        for (var x in data)
-        if (data.hasOwnProperty(x))
-        obj[x] = data[x];
-
-        return obj;
-    }
+    };
 
     _createDocumentId = function(year, month, day, channel){
         return String(year) + ("0" + (month)).slice(-2) +   ("0" + (day)).slice(-2) + "/" + channel;
-    }
+    };
 
     // see http://docs.mongodb.org/ecosystem/use-cases/pre-aggregated-reports/
     _preAllocateDataDocument = function(db, channel, date, callback){
@@ -299,7 +282,7 @@ define(function(require, exports, module) {
                 'date': dayObject, 
                 'channel': channel
             }
-        }
+        };
 
         var data = {
             '_id': idDay,
@@ -313,7 +296,8 @@ define(function(require, exports, module) {
             },
             'hourly': {},
             'minute': {}
-        }
+        };
+
         for(hour=0; hour <24;hour ++){
             data['hourly'][hour] = {};
             data['hourly'][hour]['value'] = 0;
@@ -332,7 +316,7 @@ define(function(require, exports, module) {
                 typeof callback === 'function' && callback(null,result);
             }
         });
-    }
+    };
 
     /*
         Update document, if document does not exist create a new document
@@ -366,8 +350,8 @@ define(function(require, exports, module) {
                 // console.log("updated document");
                 typeof callback === 'function' && callback(null,result);
             }
-        },{safe:true})       
-    }
+        },{safe:true});     
+    };
 
     /*
         create a new document with default values
@@ -380,15 +364,15 @@ define(function(require, exports, module) {
             } else {
                 typeof callback === 'function' && callback(null,result);
             }
-        },{upsert:true, safe:true})
-    }
+        },{upsert:true, safe:true});
+    };
 
     _writeDocument = function(db, query, data, callback, mode){
         mode = (typeof mode === "undefined") ? {upsert:true, safe:true} : mode;
         // Update daily statisics 
         db.collection('data', function(err, collection) {
             collection.update(query, data, mode, function(err, result) {
-                if (err || !result) {
+                if ( err || !result) {
                     // console.log('Error writing document channel: ' + err);
                     err = err ? err : 'document not found';
                     typeof callback === 'function' && callback(err,null);
@@ -397,11 +381,11 @@ define(function(require, exports, module) {
                 }
             });
         });
-    }
+    };
 
     _addData = function(db, channel, value, date, callback){
         var minute = date.getUTCMinutes(),
-            hour = date.getUTCHours();
+            hour = date.getUTCHours(),
             day = date.getUTCDate(),
             month = date.getUTCMonth() + 1,
             year = date.getUTCFullYear();
@@ -427,7 +411,6 @@ define(function(require, exports, module) {
             } else {
                 typeof callback === 'function' && callback(null,result);
             }
-        })
-    }
+        });
+    };
 });
-

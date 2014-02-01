@@ -42,4 +42,4 @@ describe('Start server', function() {
 			.expect(404, done);
 	});
 
-})
+});

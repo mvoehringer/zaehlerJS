@@ -70,7 +70,7 @@ define(function(require, exports, module) {
               }
           });
       });
-  }
+  };
 
   exports.deleteChannel = function(req, res) {
       var id = req.params.id;
@@ -86,7 +86,7 @@ define(function(require, exports, module) {
               res.json(req.body);
           });
       });
-  }
+  };
 });
 
 
