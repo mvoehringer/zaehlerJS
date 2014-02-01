@@ -172,7 +172,7 @@ define(function(require, exports, module) {
     }
 
     exports.addData = function(req, res) {
-        var value  = (typeof req.body["value"] === "undefined") ? 1 : req.body["value"];
+        var value  = (typeof req.body["value"] === "undefined") ? 1 : parseFloat(req.body["value"]);
         var date  = (typeof req.body["date"] === "undefined") ? new Date() : _createDate(req.body["date"]);
         var db = req.app.get('db');
         var channel = req.params.channelId;
