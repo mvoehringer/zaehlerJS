@@ -46,7 +46,8 @@ window.Channel = Backbone.Model.extend({
         kind: "",
         resolution: "",
         unit: "",
-        value: "-"
+        value: "-",
+        active: true
     }
 });
 

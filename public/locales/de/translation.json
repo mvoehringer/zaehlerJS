@@ -18,6 +18,9 @@
 		"details" :{
 			"channelDetails": "Kanal",
 			"id": "Id",
+			"active": "Aktive",
+			"visable": "Sichtbar",
+			"hidden": "Versteckt",
 			"name": "Name",
 			"description": "Beschreibung",
 			"kind": "Sensortype",

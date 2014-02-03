@@ -18,6 +18,9 @@
 		"details" :{
 			"channelDetails": "Channel",
 			"id": "Id",
+			"active": "Active",
+			"visable": "Visable",
+			"hidden": "Hidden",
 			"name": "Name",
 			"description": "Description",
 			"kind": "Kind of sensor",

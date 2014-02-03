@@ -100,6 +100,9 @@ window.HomeView = Backbone.View.extend({
 		// loading data
 		_.each(this.channels.models, function(model) {
 
+			if(model.get('active') == false){
+				return;
+			}
 			// console.log(model.get('name'));
 			var dataList = new DataCollection(Data);
 			dataList.url =  "/api/data/" +  model.get('_id');
@@ -248,12 +251,14 @@ window.HomeView = Backbone.View.extend({
     renderLiveChannels: function(){
     	var that = this;
     	_.each(this.channels.models, function(channel) {
+    		if(channel.get('active') != true){
+    			return;
+	   		}
+			var liveChannelView = new LiveChannelView({
+				model: channel
+			});
 
-        	var liveChannelView = new LiveChannelView({
-            	model: channel
-        	});
-
-        	$("#liveChannels").append(liveChannelView.render().el);
+			$("#liveChannels").append(liveChannelView.render().el);
 
 			var socket = io.connect();
 			// Listen to new data on websocket
@@ -267,8 +272,7 @@ window.HomeView = Backbone.View.extend({
 						serie.addPoint([Date.parse(data.date), data.value], true, false);
 					}
 				})			
-			});
-
+			}); 
         });
     },
 });

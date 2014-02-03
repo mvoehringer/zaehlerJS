@@ -95,7 +95,8 @@ describe('Channels API', function() {
 			kind: 'impulse',
 			resolution: '10000',
 			unit: 'energy',
-			description: 'description New Channel'
+			description: 'description New Channel',
+			active: '1'
 		};
 		request(url)
 			.post('/api/channels')
@@ -112,6 +113,7 @@ describe('Channels API', function() {
 				res.body.resolution.should.equal('10000');
 				res.body.unit.should.equal('energy');
 				res.body.description.should.equal('description New Channel');
+				res.body.active.should.equal('1');
 				done();
 			});
 	});
@@ -122,7 +124,8 @@ describe('Channels API', function() {
 			kind: 'impulse',
 			resolution: '10',
 			unit: 'energy',      
-			description: 'new description channel 2'
+			description: 'new description channel 2',
+			active: '1'
 		};
 		request(url)
 			.put('/api/channels/8a3db63e-9ae0-4090-b736-d0dbbb389e11')
@@ -140,6 +143,7 @@ describe('Channels API', function() {
 				res.body.resolution.should.equal('10');
 				res.body.unit.should.equal('energy');
 				res.body.description.should.equal('new description channel 2');
+				res.body.active.should.equal('1');
 				done();
 			});
 	});
