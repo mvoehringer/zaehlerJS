@@ -9,7 +9,7 @@ window.ChannelListView = Backbone.View.extend({
     },
     render: function () {
         var channels = this.model.models;
-        $(this.el).html('<ul class="list-group"> </ul>');
+        $(this.el).html('<ul class="list-group"> </ul><a href="#channels/add" class="btn btn-default"><i class="glyphicon glyphicon-plus"></i> <span data-i18n="mainnav.addNew">Add New</span></a>');
 
         channels.forEach(this.addOne, this);
         return this;
