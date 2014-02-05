@@ -314,10 +314,9 @@ window.LiveChannelView = Backbone.View.extend({
 				return "Wh";
 				break;
 			case "volume":
-				return "m³"
+				return "m³";
 				break;
 		}
-		console.log(unit);
 		return "";
 	},
 
