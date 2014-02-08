@@ -94,7 +94,7 @@ define(function(require, exports, module) {
 
                     cursor.each(function(err, item) {
                         // If the item is null then the cursor is exhausted/empty and closed
-                        if(item == null) {
+                        if(item === null) {
                             res.json(itemsArray);
                         }else{
                             switch(getDataFrom){
@@ -116,15 +116,15 @@ define(function(require, exports, module) {
 
                                             var dataItem = item['minute'][hour][minute];
                                             _pushValueToArray(date, dataItem, itemsArray, start, end, channel);
-                                        })
+                                        });
                                     });
                                     break;
                                 case 'day':
                                 default:
                                     // Default is Day
                                     _pushValueToArray(item['metadata']['date'], item['day'], itemsArray, start, end, channel);
+                                    break;
                             }
-
                         }
                     });
                 });
