@@ -11,6 +11,7 @@ define(function(require, exports, module) {
             if(err){
                 console.error(JSON.stringify(err));
                 res.json({'error': err}, 500);
+                return;
             }
             res.json(items);
         });
@@ -25,9 +26,11 @@ define(function(require, exports, module) {
               if(err){
                 console.error(JSON.stringify(err));
                 res.json({'error': err}, 500);
+                return;
               }
               if(!item){
                 res.json({'error': 'channel not available'}, 404);
+                return;
               }
               res.json(item);
           });
@@ -45,6 +48,7 @@ define(function(require, exports, module) {
               if (err) {
                   console.error('Error add channel: %s',err);
                   res.json({'error':'An error has occurred'}, 500);
+                  return;
               } else {
                   // console.log('Success: ' + JSON.stringify(result[0]));
                   res.json(result[0]);
@@ -62,6 +66,7 @@ define(function(require, exports, module) {
               if (err) {
                   console.error('Error updating channel: %s', err);
                   res.json({'error':'An error has occurred'}, 500);
+                  return;
               } else {
                   // console.log('' + result + ' document(s) updated');
                   // console.log(JSON.stringify(req.body));
@@ -82,6 +87,7 @@ define(function(require, exports, module) {
               }
               if(!result){
                 res.json({'error': 'channel not found'}, 404);
+                return;
               } 
               res.json(req.body);
           });
