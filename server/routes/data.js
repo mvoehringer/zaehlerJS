@@ -20,14 +20,14 @@ define(function(require, exports, module) {
     @param end enddate for filter
     */
     exports.find = function(req, res) {
-        _pushValueToArray = function (date, item, itemsArray, minDate, maxDate, channel){
+        _pushValueToArray = function (date, item, minDate, maxDate, channel){
             // ignore values out of timeslice
             if( date >= minDate  || minDate === null){
                 if (date < maxDate|| maxDate === null ) {
                     // ignore empty values
                     if(item && item.count){
                         // scale value based on item.count
-                        itemsArray.push([date.toJSON(), this._scaleValue(item.value, item.count, channel)]);
+                        res.write(JSON.stringify([date.toJSON(), this._scaleValue(item.value, item.count, channel)]) + "," );
                     }
                 }
             }
@@ -81,14 +81,17 @@ define(function(require, exports, module) {
             collection.findOne({'_id':channelId}, function(err, channel) {
                 if(err){
                     res.json({'error': err}, 500);
+                    return;
                 }
                 if(!channel){
                     res.json({'error': 'channel not found'}, 404);
+                    return;
                 }
 
+                res.writeHead(200, {"Content-Type": "application/json; charset=utf-8"});
+                res.write("[");
                 // get data for channel               
                 db.collection('data', function(err, collection) {
-                    var itemsArray = [];
                     // console.log(JSON.stringify(filter));
 
                     var stream = collection.find(filter, aggregationFields).sort( {'metadata.date': 1} ).stream();
@@ -105,7 +108,7 @@ define(function(require, exports, module) {
                                     date.setUTCHours(hour);
 
                                     var dataItem = item['hourly'][hour];
-                                    _pushValueToArray(date, dataItem, itemsArray, start, end, channel);
+                                    _pushValueToArray(date, dataItem, start, end, channel);
                                 });
                                 break;
                             case 'minute':
@@ -116,19 +119,20 @@ define(function(require, exports, module) {
                                         date.setUTCMinutes(minute);
 
                                         var dataItem = item['minute'][hour][minute];
-                                        _pushValueToArray(date, dataItem, itemsArray, start, end, channel);
+                                        _pushValueToArray(date, dataItem, start, end, channel);
                                     });
                                 });
                                 break;
                             case 'day':
                             default:
                                 // Default is Day
-                                _pushValueToArray(item['metadata']['date'], item['day'], itemsArray, start, end, channel);
+                                _pushValueToArray(item['metadata']['date'], item['day'], start, end, channel);
                                 break;
                         }
                     });
                     stream.on('close', function() {
-                        res.json(itemsArray);
+                        res.write("[]]");
+                        res.end();
                     });
                 });
 
