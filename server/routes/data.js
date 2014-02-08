@@ -90,42 +90,45 @@ define(function(require, exports, module) {
                 db.collection('data', function(err, collection) {
                     var itemsArray = [];
                     // console.log(JSON.stringify(filter));
-                    var cursor = collection.find(filter, aggregationFields).sort( {'metadata.date': 1} );
 
-                    cursor.each(function(err, item) {
-                        // If the item is null then the cursor is exhausted/empty and closed
-                        if(item === null) {
-                            res.json(itemsArray);
-                        }else{
-                            switch(getDataFrom){
-                                case 'hour':
-                                    Object.keys(item['hourly']).forEach(function(hour){
+                    var stream = collection.find(filter, aggregationFields).sort( {'metadata.date': 1} ).stream();
+                    stream.on('error', function (err) {
+                        console.error(err);
+                    });
+
+                    stream.on('data', function (item) {
+                        // console.log(item);
+                        switch(getDataFrom){
+                            case 'hour':
+                                Object.keys(item['hourly']).forEach(function(hour){
+                                    var date = new Date(item['metadata']['date']);
+                                    date.setUTCHours(hour);
+
+                                    var dataItem = item['hourly'][hour];
+                                    _pushValueToArray(date, dataItem, itemsArray, start, end, channel);
+                                });
+                                break;
+                            case 'minute':
+                                Object.keys(item['minute']).forEach(function(hour){
+                                    Object.keys(item['minute'][hour]).forEach(function(minute) {
                                         var date = new Date(item['metadata']['date']);
                                         date.setUTCHours(hour);
+                                        date.setUTCMinutes(minute);
 
-                                        var dataItem = item['hourly'][hour];
+                                        var dataItem = item['minute'][hour][minute];
                                         _pushValueToArray(date, dataItem, itemsArray, start, end, channel);
                                     });
-                                    break;
-                                case 'minute':
-                                    Object.keys(item['minute']).forEach(function(hour){
-                                        Object.keys(item['minute'][hour]).forEach(function(minute) {
-                                            var date = new Date(item['metadata']['date']);
-                                            date.setUTCHours(hour);
-                                            date.setUTCMinutes(minute);
-
-                                            var dataItem = item['minute'][hour][minute];
-                                            _pushValueToArray(date, dataItem, itemsArray, start, end, channel);
-                                        });
-                                    });
-                                    break;
-                                case 'day':
-                                default:
-                                    // Default is Day
-                                    _pushValueToArray(item['metadata']['date'], item['day'], itemsArray, start, end, channel);
-                                    break;
-                            }
+                                });
+                                break;
+                            case 'day':
+                            default:
+                                // Default is Day
+                                _pushValueToArray(item['metadata']['date'], item['day'], itemsArray, start, end, channel);
+                                break;
                         }
+                    });
+                    stream.on('close', function() {
+                        res.json(itemsArray);
                     });
                 });
 
