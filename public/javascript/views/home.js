@@ -3,15 +3,17 @@
 Date.prototype.subtractHour= function(hour){
     this.setHours(this.getHours()-hour);
     return this;
-}
+};
+
 Date.prototype.subtractDay= function(days){
     this.subtractHour(days * 24);
     return this;
-}
+};
+
 Date.prototype.subtractWeek= function(week){
     this.subtractDay(week * 7);
     return this;
-}
+};
 
 
 window.HomeView = Backbone.View.extend({
@@ -34,7 +36,7 @@ window.HomeView = Backbone.View.extend({
 	
 	events: {
         "click .scale-chart"   : "scaleChart",
-        "click .delete" : "deleteChannel",
+        "click .delete" : "deleteChannel"
     },
 
 	render: function(){
@@ -81,7 +83,8 @@ window.HomeView = Backbone.View.extend({
 					if(min['x'] < startTimestamp){
 						startTimestamp = min['x'];
 					}
-				})
+				});
+				break;
     	}
     	this.chart.xAxis[0].setExtremes(startTimestamp, nowTimestamp + 30000);
     },
@@ -100,7 +103,7 @@ window.HomeView = Backbone.View.extend({
 		// loading data
 		_.each(this.channels.models, function(model) {
 
-			if(model.get('active') == false){
+			if(model.get('active') === false){
 				return;
 			}
 			// console.log(model.get('name'));
@@ -115,7 +118,7 @@ window.HomeView = Backbone.View.extend({
 						var dataArray = [];
 						response.forEach(function(date){
 							dataArray.push([ new Date(date[0]).getTime(), date[1]]);
-						})
+						});
 
 						that.chart.addSeries({
 							name: model.get('name'),
@@ -146,14 +149,14 @@ window.HomeView = Backbone.View.extend({
 							detailDataList.fetch({
 								data: $.param(search_params),
 								success: function (data, response) {
-									_setSeries(response, data, detailDataList)
+									_setSeries(response, data, detailDataList);
 								}
-							})
+							});
 						}
 					}
 				},
-				error: function() {
-					console.log('Failed to fetch data!');
+				error: function(e) {
+					console.error('Failed to fetch data!' + e);
 				}
 			});
 		});
@@ -225,7 +228,7 @@ window.HomeView = Backbone.View.extend({
 								var dataArray = [];
 								data.forEach(function(date){
 									dataArray.push([ Date.parse(date[0]), date[1]]);
-								})
+								});
 								if(dataArray.length > 2){
 									chart.series[ serie._i ].setData(dataArray);
 								}
@@ -235,7 +238,7 @@ window.HomeView = Backbone.View.extend({
 
 					},
 					setExtremes: function (e) {
-                        if (e.max == null || e.min == null) {
+                        if (e.max === null || e.min === null) {
                            isReset = true;                            
                         }
                         else
@@ -251,7 +254,7 @@ window.HomeView = Backbone.View.extend({
     renderLiveChannels: function(){
     	var that = this;
     	_.each(this.channels.models, function(channel) {
-    		if(channel.get('active') != true){
+    		if(channel.get('active') !== true){
     			return;
 	   		}
 			var liveChannelView = new LiveChannelView({
@@ -271,10 +274,10 @@ window.HomeView = Backbone.View.extend({
 					if(serie.options.channelId == channel.get('_id')){
 						serie.addPoint([Date.parse(data.date), data.value], true, false);
 					}
-				})			
+				});	
 			}); 
         });
-    },
+    }
 });
 
 
@@ -315,6 +318,9 @@ window.LiveChannelView = Backbone.View.extend({
 				break;
 			case "volume":
 				return "m³";
+				break;
+			default:
+				return "";
 				break;
 		}
 		return "";
