@@ -1,12 +1,12 @@
-var app = require('../../server');
-var should = require('should');
+var app 	= require('../../server');
+var should 	= require('should');
 var request = require('supertest'); 
-var config = require("config");
-var Http = require('http');
+var config 	= require("config");
+var Http 	= require('http');
 var fixtures = require('pow-mongodb-fixtures').connect(config.ZaehlerJS.db.Name, {
             host: config.ZaehlerJS.db.Host,
             port: config.ZaehlerJS.db.Port 
-        })
+        });
 
 describe('Data API', function() {
 	var url = 'http://localhost:3001';

@@ -20,14 +20,14 @@ define(function(require, exports, module) {
     @param end enddate for filter
     */
     exports.find = function(req, res) {
-        _pushValueToArray = function (date, item, minDate, maxDate, channel){
+        _pushValueToArray = function (date, item, itemsArray, minDate, maxDate, channel){
             // ignore values out of timeslice
             if( date >= minDate  || minDate === null){
                 if (date < maxDate|| maxDate === null ) {
                     // ignore empty values
                     if(item && item.count){
                         // scale value based on item.count
-                        res.write(JSON.stringify([date.toJSON(), this._scaleValue(item.value, item.count, channel)]) + "," );
+                        itemsArray.push([date.toJSON(), this._scaleValue(item.value, item.count, channel)]);
                     }
                 }
             }
@@ -88,13 +88,13 @@ define(function(require, exports, module) {
                     return;
                 }
 
-                res.writeHead(200, {"Content-Type": "application/json; charset=utf-8"});
-                res.write("[");
                 // get data for channel               
                 db.collection('data', function(err, collection) {
+                    var itemsArray = [];
                     // console.log(JSON.stringify(filter));
 
                     var stream = collection.find(filter, aggregationFields).sort( {'metadata.date': 1} ).stream();
+                    
                     stream.on('error', function (err) {
                         console.error(err);
                     });
@@ -108,7 +108,7 @@ define(function(require, exports, module) {
                                     date.setUTCHours(hour);
 
                                     var dataItem = item['hourly'][hour];
-                                    _pushValueToArray(date, dataItem, start, end, channel);
+                                    _pushValueToArray(date, dataItem, itemsArray, start, end, channel);
                                 });
                                 break;
                             case 'minute':
@@ -119,20 +119,20 @@ define(function(require, exports, module) {
                                         date.setUTCMinutes(minute);
 
                                         var dataItem = item['minute'][hour][minute];
-                                        _pushValueToArray(date, dataItem, start, end, channel);
+                                        _pushValueToArray(date, dataItem, itemsArray, start, end, channel);
                                     });
                                 });
                                 break;
                             case 'day':
                             default:
                                 // Default is Day
-                                _pushValueToArray(item['metadata']['date'], item['day'], start, end, channel);
+                                _pushValueToArray(item['metadata']['date'], item['day'], itemsArray, start, end, channel);
                                 break;
                         }
                     });
+
                     stream.on('close', function() {
-                        res.write("[]]");
-                        res.end();
+                        res.json(itemsArray);
                     });
                 });
 
@@ -330,7 +330,7 @@ define(function(require, exports, module) {
     */
     _updateDocument = function(db, query, data, date, channel, callback){
 
-        _writeDocument(db, query, data, function(err,result){
+        _writeDocument(db, query, data, {safe:true}, function(err,result){
             if (err) {
                 // console.log("error updating document");
                 // could not update, so try to create the document
@@ -341,45 +341,43 @@ define(function(require, exports, module) {
                     }else{
                         // Now, the document exist, so we can update the docuemnt
                         // TODO: Optimize this, and try to write the data in the _preAllocateDataDocument function
-                        _writeDocument(db, query, data, function(err,result){
+                        _writeDocument(db, query, data, {upsert:true, safe:true}, function(err,result){
                             if(err){
                                 console.log('Error giving up to creating document: ' + err);
                                 typeof callback === 'function' && callback(err,null);
                             }else{
-                                // console.log("created Document");
                                 typeof callback === 'function' && callback(null,result);
                             }
                         });
-
                     }
                 }, data);
             } else {
                 // console.log("updated document");
                 typeof callback === 'function' && callback(null,result);
             }
-        },{safe:true});     
+        });     
     };
 
     /*
         create a new document with default values
     */
     _createDocument = function(db, query, data, callback){       
-        _writeDocument(db, query, data, function(err,result){
+        _writeDocument(db, query, data, {upsert:true, safe:true}, function(err,result){
             if (err) {
                 console.log('Error creating document: ' + err);
                 typeof callback === 'function' && callback(err,null);
             } else {
                 typeof callback === 'function' && callback(null,result);
             }
-        },{upsert:true, safe:true});
+        });
     };
 
-    _writeDocument = function(db, query, data, callback, mode){
+    _writeDocument = function(db, query, data, mode, callback){
         mode = (typeof mode === "undefined") ? {upsert:true, safe:true} : mode;
         // Update daily statisics 
         db.collection('data', function(err, collection) {
             collection.update(query, data, mode, function(err, result) {
-                if ( err || !result) {
+                if ( err || !result ) {
                     // console.log('Error writing document channel: ' + err);
                     err = err ? err : 'document not found';
                     typeof callback === 'function' && callback(err,null);
