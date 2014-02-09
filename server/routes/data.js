@@ -45,10 +45,6 @@ define(function(require, exports, module) {
             db        = req.app.get('db'),
             aggregationFields = {minute:false, hourly:false},
             getDataFrom = 'day';
-
-        // console.log(start.getTime());
-        // console.log(end.getTime());
-
         if (start && end) {
 
             var filterStart = new Date(start.getTime()),
@@ -70,12 +66,12 @@ define(function(require, exports, module) {
                 getDataFrom = 'minute';
                 aggregationFields = {day:false, hourly:false};
             }else if(end - start <= limit * 60 * 60 * 1000 ){
-                // one item per houre
+                // one item per hour
                 getDataFrom = 'hour';
                 aggregationFields = {minute:false, day:false};
             }
         }
-        // console.log(getDataFrom);
+
         // get Channel
         req.app.get('db').collection('channels', function(err, collection) {
             collection.findOne({'_id':channelId}, function(err, channel) {
